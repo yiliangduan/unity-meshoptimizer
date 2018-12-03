@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿//
+// 参考: https://github.com/juj/RectangleBinPack
+//
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,22 +15,22 @@ public class MaxRectsBinPack {
     /// <summary>
     /// 宽度
     /// </summary>
-    public float mWidth;
+    public int mWidth;
 
     /// <summary>
     /// 高度
     /// </summary>
-    public float mHeight;
+    public int mHeight;
 
     /// <summary>
     /// 已经使用的Rect
     /// </summary>
-    private List<Rect> mUsedRectangles;
+    private List<Rect> mUsedRectangles = new List<Rect>();
 
     /// <summary>
     /// 还未使用的Rect
     /// </summary>
-    private List<Rect> mFreeRectRangles;
+    private List<Rect> mFreeRectRangles = new List<Rect>();
 
 
     public enum FreeRectChoiceHeuristic
@@ -39,7 +42,7 @@ public class MaxRectsBinPack {
 		RectContactPointRule ///< -CP: Choosest the placement where the rectangle touches other rects as much as possible.
 	};
 
-    public MaxRectsBinPack(float width, float height, bool allowFilp)
+    public MaxRectsBinPack(int width, int height, bool allowFilp)
     {
         bAllowFilp = allowFilp;
         mWidth = width;
@@ -55,13 +58,13 @@ public class MaxRectsBinPack {
     /// <summary>
     /// 插入一个Node
     /// </summary>
-    public Rect Insert(float width, float height, FreeRectChoiceHeuristic freeRectChoiceHeuristic)
+    public Rect Insert(int width, int height, FreeRectChoiceHeuristic freeRectChoiceHeuristic)
     {
         Rect newNode = Rect.zero;
 
         // Unused in this function. We don't need to know the score after finding the position.
-        float score1 = float.MaxValue;
-        float score2 = float.MaxValue;
+        int score1 = int.MaxValue;
+        int score2 = int.MaxValue;
 
         switch (freeRectChoiceHeuristic)
         {
@@ -85,7 +88,7 @@ public class MaxRectsBinPack {
         if (newNode.height == 0)
             return newNode;
 
-        float numRectanglesToProcess = mFreeRectRangles.Count;
+        int numRectanglesToProcess = mFreeRectRangles.Count;
 
         for (int i=0; i<numRectanglesToProcess; ++i)
         {
@@ -111,8 +114,8 @@ public class MaxRectsBinPack {
 
         while (rects.Count > 0)
         {
-            float bestScore1 = float.MaxValue;
-            float bestScore2 = float.MaxValue;
+            int bestScore1 = int.MaxValue;
+            int bestScore2 = int.MaxValue;
 
             int bestRectIndex = -1;
 
@@ -120,10 +123,10 @@ public class MaxRectsBinPack {
 
             for (int i=0; i<rects.Count; ++i)
             {
-                float score1 = float.MaxValue;
-                float score2 = float.MaxValue;
+                int score1 = int.MaxValue;
+                int score2 = int.MaxValue;
 
-                Rect newNode = ScoreRect((float)rects[i].x, (float)rects[i].y, freeRectChoiceHeuristic, ref score1, ref score2);
+                Rect newNode = ScoreRect((int)rects[i].x, (int)rects[i].y, freeRectChoiceHeuristic, ref score1, ref score2);
 
                 if (score1 < bestScore1 || (score1 == bestScore1 && score2 < bestScore2))
                 {
@@ -149,22 +152,22 @@ public class MaxRectsBinPack {
     /// 找到一块 短边(取width, height其中短的) 填充率最高的剩余空间。
     /// </summary>
     /// <returns></returns>
-    public Rect FindPositionForNewNodeBestShortSideFit(float width, float height, ref float bestShortSideFit, ref float bestLongSideFit)
+    public Rect FindPositionForNewNodeBestShortSideFit(int width, int height, ref int bestShortSideFit, ref int bestLongSideFit)
     {
         Rect bestNode = Rect.zero;
 
-        bestShortSideFit = float.MaxValue;
-        bestLongSideFit = float.MaxValue;
+        bestShortSideFit = int.MaxValue;
+        bestLongSideFit = int.MaxValue;
 
         for (int i=0; i < mFreeRectRangles.Count; ++i)
         {
             if (mFreeRectRangles[i].width >= width && mFreeRectRangles[i].height >= height)
             {
-                float leftoverHoriz = Mathf.Abs(mFreeRectRangles[i].width - width);
-                float leftoverVert = Mathf.Abs(mFreeRectRangles[i].height - height);
+                int leftoverHoriz = (int)Mathf.Abs(mFreeRectRangles[i].width - width);
+                int leftoverVert = (int)Mathf.Abs(mFreeRectRangles[i].height - height);
 
-                float shortSideFit = Mathf.Min(leftoverHoriz, leftoverVert);
-                float longSideFit = Mathf.Max(leftoverHoriz, leftoverVert);
+                int shortSideFit = Mathf.Min(leftoverHoriz, leftoverVert);
+                int longSideFit = Mathf.Max(leftoverHoriz, leftoverVert);
 
                 if (shortSideFit < bestShortSideFit || (shortSideFit == bestShortSideFit && longSideFit < bestLongSideFit))
                 {
@@ -181,11 +184,11 @@ public class MaxRectsBinPack {
 
             if (bAllowFilp && mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
             {
-                float flippedLeftoverHoriz = Mathf.Abs(mFreeRectRangles[i].width - height);
-                float flippedLeftoverVert = Mathf.Abs(mFreeRectRangles[i].height - width);
+                int flippedLeftoverHoriz = (int)Mathf.Abs(mFreeRectRangles[i].width - height);
+                int flippedLeftoverVert = (int)Mathf.Abs(mFreeRectRangles[i].height - width);
 
-                float flippedShortSideFit = Mathf.Min(flippedLeftoverHoriz, flippedLeftoverVert);
-                float flippedLongSideFit = Mathf.Max(flippedLeftoverHoriz, flippedLeftoverVert);
+                int flippedShortSideFit = Mathf.Min(flippedLeftoverHoriz, flippedLeftoverVert);
+                int flippedLongSideFit = Mathf.Max(flippedLeftoverHoriz, flippedLeftoverVert);
 
                 if (flippedShortSideFit < bestShortSideFit || (flippedShortSideFit == bestShortSideFit && flippedLongSideFit < bestLongSideFit))
                 {
@@ -207,22 +210,22 @@ public class MaxRectsBinPack {
     /// <summary>
     /// 找到一块 长边(取width, height其中长的) 填充率最高的剩余空间填充
     /// </summary>
-    public Rect FindPositionForNewNodeBestLongSideFit(float width, float height, ref float bestShortSideFit, ref float bestLongSideFit)
+    public Rect FindPositionForNewNodeBestLongSideFit(int width, int height, ref int bestShortSideFit, ref int bestLongSideFit)
     {
         Rect bestNode = Rect.zero;
 
-        bestShortSideFit = float.MaxValue;
-        bestLongSideFit = float.MaxValue;
+        bestShortSideFit = int.MaxValue;
+        bestLongSideFit = int.MaxValue;
 
         for (int i=0; i<mFreeRectRangles.Count; ++i)
         {
             if (mFreeRectRangles[i].width >= width && mFreeRectRangles[i].height >= height)
             {
-                float leftoverHoriz = Mathf.Abs(mFreeRectRangles[i].width - width);
-                float leftoverVert = Mathf.Abs(mFreeRectRangles[i].height - height);
+                int leftoverHoriz = (int)Mathf.Abs(mFreeRectRangles[i].width - width);
+                int leftoverVert = (int)Mathf.Abs(mFreeRectRangles[i].height - height);
 
-                float shortSideFit = Mathf.Min(leftoverHoriz, leftoverVert);
-                float longSideFit = Mathf.Max(leftoverHoriz, leftoverVert);
+                int shortSideFit = Mathf.Min(leftoverHoriz, leftoverVert);
+                int longSideFit = Mathf.Max(leftoverHoriz, leftoverVert);
 
                 if (longSideFit < bestLongSideFit || (longSideFit == bestLongSideFit && shortSideFit < bestShortSideFit))
                 {
@@ -239,11 +242,11 @@ public class MaxRectsBinPack {
 
             if (bAllowFilp && mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
             {
-                float leftoverHoriz = Mathf.Abs(mFreeRectRangles[i].width - height);
-                float leftoverVert = Mathf.Abs(mFreeRectRangles[i].height - width);
+                int leftoverHoriz = (int)Mathf.Abs(mFreeRectRangles[i].width - height);
+                int leftoverVert = (int)Mathf.Abs(mFreeRectRangles[i].height - width);
 
-                float shortSideFit = Mathf.Min(leftoverHoriz, leftoverVert);
-                float longSideFit = Mathf.Max(leftoverHoriz, leftoverVert);
+                int shortSideFit = Mathf.Min(leftoverHoriz, leftoverVert);
+                int longSideFit = Mathf.Max(leftoverHoriz, leftoverVert);
 
                 if (longSideFit < bestLongSideFit || (longSideFit == bestLongSideFit && shortSideFit < bestShortSideFit))
                 {
@@ -266,18 +269,18 @@ public class MaxRectsBinPack {
     /// <summary>
     /// 按照找到的剩余空间块的左下角坐标来计算，加上高度之后取y值越小得那个空闲块
     /// </summary>
-    public Rect FindPositionForNewNodeBottomLeft(float width, float height, ref float bestX, ref float bestY)
+    public Rect FindPositionForNewNodeBottomLeft(int width, int height, ref int bestX, ref int bestY)
     {
         Rect bestNode = Rect.zero;
 
-        bestY = float.MaxValue;
-        bestX = float.MaxValue;
+        bestY = int.MaxValue;
+        bestX = int.MaxValue;
 
         for (int i=0; i<mFreeRectRangles.Count; ++i)
         {
             if (mFreeRectRangles[i].width >= width && mFreeRectRangles[i].height >= height)
             {
-                float topSideY = mFreeRectRangles[i].y + height;
+                int topSideY = (int)mFreeRectRangles[i].y + height;
                 if (topSideY < bestY || topSideY == bestY && mFreeRectRangles[i].x < bestX)
                 {
                     bestNode.x = mFreeRectRangles[i].x;
@@ -287,13 +290,13 @@ public class MaxRectsBinPack {
                     bestNode.height = height;
 
                     bestY = topSideY;
-                    bestX = mFreeRectRangles[i].x;
+                    bestX = (int)mFreeRectRangles[i].x;
                 }
             }
 
             if (bAllowFilp && mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
             {
-                float topSideY = mFreeRectRangles[i].y + width;
+                int topSideY = (int)mFreeRectRangles[i].y + width;
                 if (topSideY < bestY || (topSideY == bestY && mFreeRectRangles[i].x < bestX))
                 {
                     bestNode.x = mFreeRectRangles[i].x;
@@ -303,7 +306,7 @@ public class MaxRectsBinPack {
                     bestNode.height = width;
 
                     bestY = topSideY;
-                    bestX = mFreeRectRangles[i].x;
+                    bestX = (int)mFreeRectRangles[i].x;
                 }
             }
         }
@@ -314,17 +317,17 @@ public class MaxRectsBinPack {
     /// <summary>
     /// 根据长，宽的比例相加结果为因子来计算最优
     /// </summary>
-    public Rect FindPositionForNewNodeContactPoint(float width, float height, ref float bestContactScore)
+    public Rect FindPositionForNewNodeContactPoint(int width, int height, ref int bestContactScore)
     {
         Rect bestNode = Rect.zero;
 
-        bestContactScore = -1f;
+        bestContactScore = -1;
 
         for (int i=0; i< mFreeRectRangles.Count; ++i)
         {
             if (mFreeRectRangles[i].width >= width && mFreeRectRangles[i].height >= height)
             {
-                float score = ContactPointScoreNode(mFreeRectRangles[i].x, mFreeRectRangles[i].y, width, height);
+                int score = ContactPointScoreNode((int)mFreeRectRangles[i].x, (int)mFreeRectRangles[i].y, width, height);
                 if (score > bestContactScore)
                 {
                     bestNode.x = mFreeRectRangles[i].x;
@@ -339,7 +342,7 @@ public class MaxRectsBinPack {
 
             if (mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
             {
-                float score = ContactPointScoreNode(mFreeRectRangles[i].x, mFreeRectRangles[i].y, height, width);
+                int score = ContactPointScoreNode((int)mFreeRectRangles[i].x, (int)mFreeRectRangles[i].y, height, width);
 
                 if (score > bestContactScore)
                 {
@@ -360,23 +363,23 @@ public class MaxRectsBinPack {
     /// <summary>
     /// 根据面积占空闲块的比例来取最优
     /// </summary>
-    public Rect FindPositionForNewNodeBestAreaFit(float width, float height, ref float bestAreaFit, ref float bestShortSideFit)
+    public Rect FindPositionForNewNodeBestAreaFit(int width, int height, ref int bestAreaFit, ref int bestShortSideFit)
     {
         Rect bestNode = Rect.zero;
 
-        bestAreaFit = float.MaxValue;
-        bestShortSideFit = float.MaxValue;
+        bestAreaFit = int.MaxValue;
+        bestShortSideFit = int.MaxValue;
 
         for (int i=0; i < mFreeRectRangles.Count; ++i)
         {
-            float areaFit = mFreeRectRangles[i].width * mFreeRectRangles[i].height - width * height;
+            int areaFit = (int)(mFreeRectRangles[i].width * mFreeRectRangles[i].height - width * height);
 
             if (mFreeRectRangles[i].width >= width && mFreeRectRangles[i].height >= height)
             {
-                float leftoverHoriz = Mathf.Abs(mFreeRectRangles[i].width - width);
-                float leftoverVert = Mathf.Abs(mFreeRectRangles[i].height - height);
+                int leftoverHoriz = (int)Mathf.Abs(mFreeRectRangles[i].width - width);
+                int leftoverVert = (int)Mathf.Abs(mFreeRectRangles[i].height - height);
 
-                float shortSideFit = Mathf.Min(leftoverHoriz, leftoverVert);
+                int shortSideFit = Mathf.Min(leftoverHoriz, leftoverVert);
 
                 if (areaFit < bestAreaFit || (areaFit == bestAreaFit && shortSideFit < bestShortSideFit))
                 {
@@ -393,9 +396,10 @@ public class MaxRectsBinPack {
 
             if (bAllowFilp && mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
             {
-                float leftoverHoriz = Mathf.Abs(mFreeRectRangles[i].width - height);
-                float leftoverVert = Mathf.Abs(mFreeRectRangles[i].height - width);
-                float shortSideFit = Mathf.Min(leftoverHoriz, leftoverVert);
+                int leftoverHoriz = (int)Mathf.Abs(mFreeRectRangles[i].width - height);
+                int leftoverVert = (int)Mathf.Abs(mFreeRectRangles[i].height - width);
+
+                int shortSideFit = Mathf.Min(leftoverHoriz, leftoverVert);
 
                 if (areaFit < bestAreaFit || (areaFit == bestAreaFit && shortSideFit < bestShortSideFit))
                 {
@@ -412,9 +416,9 @@ public class MaxRectsBinPack {
         return bestNode;
     }
 
-    private float ContactPointScoreNode(float x, float y, float width, float height)
+    private int ContactPointScoreNode(int x, int y, int width, int height)
     {
-        float score = 0;
+        int score = 0;
 
         if (0 == x || x + width == mWidth)
         {
@@ -430,19 +434,19 @@ public class MaxRectsBinPack {
         {
             if (mUsedRectangles[i].x == x + width || mUsedRectangles[i].x + mUsedRectangles[i].width == x)
             {
-                score += CommonIntervalLength(mUsedRectangles[i].y, mUsedRectangles[i].y + mUsedRectangles[i].height, y, y + height);
+                score += CommonIntervalLength((int)mUsedRectangles[i].y, (int)(mUsedRectangles[i].y + mUsedRectangles[i].height), y, y + height);
             }
 
             if (mUsedRectangles[i].y == y + height || mUsedRectangles[i].y + mUsedRectangles[i].height == y)
             {
-                score += CommonIntervalLength(mUsedRectangles[i].x, mUsedRectangles[i].x + mUsedRectangles[i].width, x, x + height);
+                score += CommonIntervalLength((int)mUsedRectangles[i].x, (int)(mUsedRectangles[i].x + mUsedRectangles[i].width), x, x + height);
             }
         }
 
         return score;
     }
 
-    private float CommonIntervalLength(float i1start, float i1end, float i2start, float i2end)
+    private int CommonIntervalLength(int i1start, int i1end, int i2start, int i2end)
     {
         if (i1end < i2start || i2end < i1start)
             return 0;
@@ -495,12 +499,12 @@ public class MaxRectsBinPack {
     /// <summary>
     /// Rect的匹配度计算
     /// </summary>
-    private Rect ScoreRect(float width, float height, FreeRectChoiceHeuristic freeRectChoiceHeuristic, ref float score1, ref float score2 )
+    private Rect ScoreRect(int width, int height, FreeRectChoiceHeuristic freeRectChoiceHeuristic, ref int score1, ref int score2 )
     {
         Rect newNode = Rect.zero;
 
-        score1 = float.MaxValue;
-        score2 = float.MaxValue;
+        score1 = int.MaxValue;
+        score2 = int.MaxValue;
 
         switch(freeRectChoiceHeuristic)
         {
@@ -524,8 +528,8 @@ public class MaxRectsBinPack {
 
         if (newNode.height == 0)
         {
-            score1 = float.MaxValue;
-            score2 = float.MaxValue;
+            score1 = int.MaxValue;
+            score2 = int.MaxValue;
         }
 
         return newNode;
@@ -537,7 +541,7 @@ public class MaxRectsBinPack {
     /// <param name="node"></param>
     private void PlaceRect(Rect node)
     {
-        float numRectanglesToProcess = mFreeRectRangles.Count;
+        int numRectanglesToProcess = mFreeRectRangles.Count;
 
         for (int i=0; i<numRectanglesToProcess; ++i)
         {
@@ -558,13 +562,13 @@ public class MaxRectsBinPack {
     /// 计算当前整个Rect的使用比例
     /// </summary>
     /// <returns></returns>
-    private float Occupancy()
+    private int Occupancy()
     {
-        float usedSurfaceArea = 0;
+        int usedSurfaceArea = 0;
 
         for (int i=0; i<mUsedRectangles.Count; ++i)
         {
-            usedSurfaceArea += mUsedRectangles[i].width * mUsedRectangles[i].height;
+            usedSurfaceArea += (int)(mUsedRectangles[i].width * mUsedRectangles[i].height);
         }
 
         return usedSurfaceArea / (mWidth * mHeight);

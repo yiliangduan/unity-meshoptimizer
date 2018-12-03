@@ -18,15 +18,11 @@ namespace Elang.Tools
                 textureAtlas.Pack();
             }
 
-            if (GUILayout.Button("Flush"))
-            {
-                textureAtlas.Flush();
-            }
             GUILayout.EndHorizontal();
       
             for (int i=0; i<textureAtlas.ElementList.Count; ++i)
             {
-                TextureAltasElement textureInfo = textureAtlas.ElementList[i];
+                TextureAtlasElement textureInfo = textureAtlas.ElementList[i];
 
                 GUILayout.BeginHorizontal();
 
