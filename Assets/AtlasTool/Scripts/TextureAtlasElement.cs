@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TextureAtlasElement : ScriptableObject
+[System.Serializable]
+public class TextureAtlasElement
 {
     public Texture2D Tex;
     public Vector2 Offset;

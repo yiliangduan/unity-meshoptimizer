@@ -47,25 +47,27 @@ public class TexturePacker  {
 
         int atlasIndex = 0;
 
-        TextureAtlas atlas = new TextureAtlas(limitWidth, limitHeight, false, Application.dataPath+"Res/", atlasIndex);
-
-        for (int i=0; i< textureList.Count; ++i)
+        while (textureList.Count > 0)
         {
-            Texture2D element = textureList[i];
+            TextureAtlas atlas = ScriptableObject.CreateInstance<TextureAtlas>();
+            atlas.Init(limitWidth, limitHeight, false, "Assets/Res/", atlasIndex);
 
-            if (null != element)
+            for (int i=textureList.Count-1; i>=0; --i)
             {
-                if(!atlas.AddTexture(element))
+                if(atlas.AddTexture(textureList[i]))
                 {
-                    atlas.Pack();
-
-                    atlas = new TextureAtlas(limitWidth, limitHeight, false, Application.dataPath + "Res/", atlasIndex);
-                    mAtlasList.Add(atlas);
+                    textureList.RemoveAt(i);
                 }
             }
+
+            mAtlasList.Add(atlas);
+            atlasIndex++;
         }
 
-        atlas.Pack();
+        for (int i=0; i<mAtlasList.Count; ++i)
+        {
+            mAtlasList[i].Pack();
+        }
     }
 
     /// <summary>

@@ -454,8 +454,59 @@ public class MaxRectsBinPack {
         return Mathf.Min(i1end, i2end) - Mathf.Max(i1start, i2start);
     }
 
+    /// <summary>
+    /// 分割分配的一个空闲空间
+    /// </summary>
     private bool SplitFreeNode(Rect freeNode, Rect usedNode)
     {
+        //空闲空间和分配的空间位置不相交，则直接返回
+        if (usedNode.x >= freeNode.x + freeNode.width || usedNode.x + usedNode.width <= freeNode.x ||
+            usedNode.y >= freeNode.y + freeNode.height || usedNode.y + usedNode.height <= freeNode.y)
+        {
+            return false;
+        }
+
+        //x相交
+        if (usedNode.x < freeNode.x + freeNode.width && usedNode.x + usedNode.width > freeNode.x)
+        {
+            if (usedNode.y > freeNode.y && usedNode.y < freeNode.y + freeNode.height)
+            {
+                Rect newNode = freeNode;
+                newNode.height = usedNode.y - newNode.y;
+                mFreeRectRangles.Add(newNode);
+            }
+
+            if (usedNode.y + usedNode.height < freeNode.y + freeNode.height)
+            {
+                Rect newNode = freeNode;
+                newNode.y = usedNode.y + usedNode.height;
+                newNode.height = freeNode.y + freeNode.height - (usedNode.y + usedNode.height);
+
+                mFreeRectRangles.Add(newNode);
+            }
+        }
+
+        //y相交
+        if (usedNode.y < freeNode.y + freeNode.height && usedNode.y + usedNode.height > freeNode.y)
+        {
+            if (usedNode.x > freeNode.x && usedNode.x < freeNode.x + freeNode.width)
+            {
+                Rect newNode = freeNode;
+
+                newNode.width = usedNode.x - newNode.x;
+                mFreeRectRangles.Add(newNode);
+            }
+
+            if (usedNode.x + usedNode.width < freeNode.x + freeNode.width)
+            {
+                Rect newNode = freeNode;
+                newNode.x = usedNode.x + usedNode.width;
+                newNode.width = freeNode.x + freeNode.width - (usedNode.x + usedNode.width);
+
+                mFreeRectRangles.Add(newNode);
+            }
+        }
+
         return true;
     }
 

@@ -5,17 +5,11 @@ using UnityEngine;
 
 public class TextureAtlas : ScriptableObject {
 
-    #region 序列化的数据
-    public Texture2D TargetTex;
-
-    public Vector2 Offset;
-    public Vector2 Scale;
-
     public List<TextureAtlasElement> ElementList = new List<TextureAtlasElement>();
 
-    #endregion
+    public int Width;
+    public int Height;
 
-    #region 
     private string mOutPutDir;
 
     private string mAssetPath;
@@ -24,35 +18,32 @@ public class TextureAtlas : ScriptableObject {
     private MaxRectsBinPack mMaxRectsBinPack;
 
     private bool bDirty;
-
-    private int mWidth;
-    private int mHeight;
-
     private bool mAllowFlip;
 
-    private MaxRectsBinPack.FreeRectChoiceHeuristic mPackStrategy= MaxRectsBinPack.FreeRectChoiceHeuristic.RectBestAreaFit;
-    #endregion
+    private Texture2D mAtlas;
 
-    public TextureAtlas(int width, int height, bool allowFlip, string outputDir, int index)
+    private MaxRectsBinPack.FreeRectChoiceHeuristic mPackStrategy= MaxRectsBinPack.FreeRectChoiceHeuristic.RectBestShortSideFit;
+
+    public void Init(int width, int height, bool allowFlip, string outputDir, int index)
     {
         mMaxRectsBinPack = new MaxRectsBinPack(width, height, allowFlip);
 
-        mWidth = width;
-        mHeight = height;
+        Width = width;
+        Height = height;
 
         mAllowFlip = allowFlip;
 
         mOutPutDir = outputDir;
 
-        string assetDir = outputDir + "/Asset/";
+        string assetDir = outputDir + "Asset/";
         CreateDir(assetDir);
 
-        mAssetPath = assetDir + index + ".asset";
+        mAssetPath = assetDir + "atlas_" + index + ".asset";
 
-        string atlasDir = outputDir + "/Atlas/";
+        string atlasDir = outputDir + "Atlas/";
         CreateDir(atlasDir);
 
-        mAtlasPath = atlasDir + index + ".png";
+        mAtlasPath = atlasDir + "atlas_" +index + ".png";
     }
 
     public void Pack()
@@ -64,23 +55,74 @@ public class TextureAtlas : ScriptableObject {
                 File.Delete(mAssetPath);
             }
 
-            AssetDatabase.CreateAsset(this, mAssetPath);
+            WriteTexture();
 
-            Texture2D atlas = new Texture2D(mWidth, mHeight, TextureFormat.RGBA32, false);
-
-            for (int i=0; i<ElementList.Count; ++i)
-            {
-                TextureAtlasElement element = ElementList[i];
-
-                if (null != element && null != element.Tex)
-                {
-                    Color[] colors = element.Tex.GetPixels();
-
-                    atlas.SetPixels((int)element.Offset.x, (int)element.Offset.y, (int)(element.Tex.width*element.Scale.x), (int)(element.Tex.height*element.Scale.y), colors);
-                }
-            }
+            WriteAsset();
 
             bDirty = false;
+        }
+    }
+
+    private void WriteTexture()
+    {
+        Texture2D atlas = new Texture2D(Width, Height, TextureFormat.RGBA32, false);
+
+        Color[] defaultColors = atlas.GetPixels();
+
+        //设置默认的颜色为黑色
+
+        Color defaultColor = new Color(0, 0, 0, 0);
+        for (int i = 0; i < defaultColors.Length; ++i)
+        {
+            defaultColors[i] = defaultColor;
+        }
+
+        //把每张图片的像素写入atlas中.
+        for (int i = 0; i < ElementList.Count; ++i)
+        {
+            TextureAtlasElement element = ElementList[i];
+
+            if (null != element && null != element.Tex)
+            {
+                Color[] colors = element.Tex.GetPixels();
+
+                int offsetX = (int)element.Offset.x;
+                int offsetY = (int)element.Offset.y;
+
+                for (int column = 0; column < element.Tex.width; ++column)
+                {
+                    for (int row = 0; row < element.Tex.height; ++row)
+                    {
+                        int atlasColorIndex = (column + offsetX) + (row + offsetY) * atlas.width;
+                        int texColorIndex = column + row * element.Tex.width;
+
+                        defaultColors[atlasColorIndex] = colors[texColorIndex];
+                    }
+                }
+            }
+        }
+
+        atlas.SetPixels(defaultColors);
+        atlas.Apply();
+
+        mAtlas = atlas;
+
+        File.WriteAllBytes(mAtlasPath, atlas.EncodeToPNG());
+    }
+
+    private void WriteAsset()
+    {
+        TextureAtlasAsset asset = ScriptableObject.CreateInstance<TextureAtlasAsset>();
+
+        if (null != asset)
+        {
+            asset.Elements = ElementList.ToArray();
+            asset.Atlas = AssetDatabase.LoadAssetAtPath<Texture2D>(mAtlasPath);
+            asset.Width = Width;
+            asset.Height = Height;
+
+            AssetDatabase.CreateAsset(asset, mAssetPath);
+            AssetDatabase.SaveAssets();
         }
     }
 
