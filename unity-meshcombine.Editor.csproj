@@ -125,7 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\AtlasTool\Editor\TextureAtlasEditor.cs" />
-    <Compile Include="Assets\Test\Editor\Test.cs" />
+    <Compile Include="Assets\AtlasTool\Editor\TexturePackerEditor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

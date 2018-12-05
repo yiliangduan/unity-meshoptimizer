@@ -9,7 +9,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d0de7f3bff914ff48b982d06386196e8, type: 3}
-  m_Name: transparent_asset_0
+  m_Name: aaa_0
   m_EditorClassIdentifier: 
   ElementList:
   - Tex: {fileID: 2800000, guid: 8d48c5ae790406e49b8a846b679aa9e4, type: 3}
@@ -25,12 +25,12 @@ MonoBehaviour:
     Offset: {x: 616, y: 311}
     Scale: {x: 1, y: 1}
   - Tex: {fileID: 2800000, guid: e7075111eaeddd046aa2ead210b711c9, type: 3}
-    Offset: {x: 800, y: 0}
+    Offset: {x: 616, y: 494}
     Scale: {x: 1, y: 1}
   - Tex: {fileID: 2800000, guid: f33c767ba5af12e4f84031a642d6ad31, type: 3}
-    Offset: {x: 500, y: 311}
+    Offset: {x: 0, y: 876}
     Scale: {x: 1, y: 1}
   Width: 1024
   Height: 1024
-  Atlas: {fileID: 2800000, guid: 032f1150ae0ab254e9127599bb722969, type: 3}
+  Atlas: {fileID: 2800000, guid: 509149f9f2189f04ab74d3467d4da8f2, type: 3}
   IsTransparent: 1

@@ -5,8 +5,6 @@ using UnityEngine;
 
 public class TexturePacker  {
 
-    private List<TextureAtlas> mAtlasList = new List<TextureAtlas>();
-
     private int mLimitWidth;
     private int mLimitHeight;
 
@@ -37,13 +35,22 @@ public class TexturePacker  {
             }
         }
 
-        Pack(textureList, limitWidth, limitHeight);
+        string atlasName;
+        string[] dirParts = textureDir.Split('/');
+        if (dirParts.Length > 0)
+        {
+            atlasName = dirParts[dirParts.Length-1].ToLower();
+        }
+        else
+        {
+            atlasName = string.Empty;
+        }
+
+        Pack(textureList, atlasName, limitWidth, limitHeight);
     }
 
-    public void Pack(List<Texture2D> textureList, int limitWidth, int limitHeight)
+    public void Pack(List<Texture2D> textureList, string atlasName, int limitWidth, int limitHeight)
     {
-        mAtlasList.Clear();
-
         mLimitWidth = limitWidth;
         mLimitHeight = limitHeight;
 
@@ -65,26 +72,26 @@ public class TexturePacker  {
             }
         }
 
-        PackAtlas(transparentTexList, true);
+        PackAtlas(transparentTexList, atlasName, true);
 
-        PackAtlas(opaqueTexList, false);
-
-        mAtlasList.Clear();
+        PackAtlas(opaqueTexList, atlasName, false);
     }
 
-    private void PackAtlas(List<Texture2D> textureList, bool isTransparent)
+    private List<TextureAtlas> PackAtlas(List<Texture2D> textureList, string atlasName, bool isTransparent)
     {
         int atlasIndex = 0;
         int textureCount = textureList.Count;
 
         textureList.Sort((a, b)=> { return a.width * a.height - b.width * b.height;});
 
+        List<TextureAtlas> atlasList = new List<TextureAtlas>();
+
         while (textureList.Count > 0)
         {
             EditorUtility.DisplayProgressBar("", "Layout all texture to atlas ", (atlasIndex + 1) / textureCount);
 
             TextureAtlas atlas = ScriptableObject.CreateInstance<TextureAtlas>();
-            atlas.Init(mLimitWidth, mLimitHeight, false, atlasIndex, isTransparent);
+            atlas.Init(mLimitWidth, mLimitHeight, false, isTransparent, atlasName+"_"+ atlasIndex);
 
             for (int i = textureList.Count - 1; i >= 0; --i)
             {
@@ -94,18 +101,20 @@ public class TexturePacker  {
                 }
             }
 
-            mAtlasList.Add(atlas);
+            atlasList.Add(atlas);
             atlasIndex++;
         }
 
-        for (int i = 0; i < mAtlasList.Count; ++i)
+        for (int i = 0; i < atlasList.Count; ++i)
         {
-            EditorUtility.DisplayProgressBar("", "Pack atlas ", (i + 1) / mAtlasList.Count);
+            EditorUtility.DisplayProgressBar("", "Pack atlas ", (i + 1) / atlasList.Count);
 
-            mAtlasList[i].Pack();
+            atlasList[i].Pack();
         }
 
         EditorUtility.ClearProgressBar();
+
+        return atlasList;
     }
 
     /// <summary>

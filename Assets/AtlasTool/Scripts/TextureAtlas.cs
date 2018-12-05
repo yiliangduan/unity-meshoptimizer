@@ -31,12 +31,10 @@ public class TextureAtlas : ScriptableObject {
     private bool bDirty;
     private bool mAllowFlip;
 
-    private int mIndex;
-
-    private MaxRectsBinPack.FreeRectChoiceHeuristic mPackStrategy= MaxRectsBinPack.FreeRectChoiceHeuristic.RectBestAreaFit;
+    private MaxRectsBinPack.FreeRectChoiceHeuristic mPackStrategy= MaxRectsBinPack.FreeRectChoiceHeuristic.RectContactPointRule;
     #endregion
 
-    public void Init(int width, int height, bool allowFlip, int index, bool isTransparent)
+    public void Init(int width, int height, bool allowFlip, bool isTransparent, string atlasName)
     {
         mMaxRectsBinPack = new MaxRectsBinPack(width, height, allowFlip);
 
@@ -49,7 +47,8 @@ public class TextureAtlas : ScriptableObject {
 
         if (isTransparent)
         {
-            mAssetPath = AtlasConfig.TransparentAssetDir + AtlasConfig.TransparentAssetNamePrefix + index + ".asset";
+            atlasName = string.IsNullOrEmpty(atlasName) ? AtlasConfig.TransparentAssetNamePrefix + atlasName : atlasName;
+            mAssetPath = AtlasConfig.TransparentAssetDir + atlasName + ".asset";
 
             if (!Directory.Exists(AtlasConfig.TransparentAssetDir))
             {
@@ -58,7 +57,8 @@ public class TextureAtlas : ScriptableObject {
         }
         else
         {
-            mAssetPath = AtlasConfig.OpaqueAssetDir + AtlasConfig.OpaqueAssetNamePrefix + index + ".asset";
+            atlasName = string.IsNullOrEmpty(atlasName) ? AtlasConfig.OpaqueAssetNamePrefix + atlasName : atlasName;
+            mAssetPath = AtlasConfig.OpaqueAssetDir + atlasName + ".asset";
 
             if (!Directory.Exists(AtlasConfig.OpaqueAssetDir))
             {
@@ -68,7 +68,8 @@ public class TextureAtlas : ScriptableObject {
 
         if (isTransparent)
         {
-            mAtlasPath = AtlasConfig.TransparentAtlasDir + AtlasConfig.TransparentAtlasNamePrefix + index + ".png";
+            atlasName = string.IsNullOrEmpty(atlasName) ? AtlasConfig.TransparentAtlasNamePrefix + atlasName : atlasName;
+            mAtlasPath = AtlasConfig.TransparentAtlasDir + atlasName + ".png";
 
             if (!Directory.Exists(AtlasConfig.TransparentAtlasDir))
             {
@@ -77,7 +78,8 @@ public class TextureAtlas : ScriptableObject {
         }
         else
         {
-            mAtlasPath = AtlasConfig.OpaqueAtlasDir + AtlasConfig.OpaqueAtlasnamePrefix + index + ".jpg";
+            atlasName = string.IsNullOrEmpty(atlasName) ? AtlasConfig.OpaqueAtlasnamePrefix + atlasName : atlasName;
+            mAtlasPath = AtlasConfig.OpaqueAtlasDir + atlasName + ".jpg";
 
             if (!Directory.Exists(AtlasConfig.OpaqueAtlasDir))
             {
@@ -156,6 +158,11 @@ public class TextureAtlas : ScriptableObject {
     private void WriteAsset()
     {
         Atlas = AssetDatabase.LoadAssetAtPath<Texture2D>(mAtlasPath);
+
+        if (null == this)
+        {
+            Debug.LogError("WriteAsset this is null!");
+        }
         
         AssetDatabase.CreateAsset(this, mAssetPath);
         AssetDatabase.SaveAssets();

@@ -5,19 +5,22 @@ using UnityEngine;
 
 public class AtlasConfig  {
 
-    private const string AssetDir = "Assets/Res/Asset/";
-    public static string AtlasDir = "Assets/Res/Atlas/";
+    public const int AtlasDefaultWidth = 1024;
+    public const int AtlasDefaultHeight = 1024;
 
-    public static string OpaqueAssetDir = AssetDir+"Opaque/";
-    public static string TransparentAssetDir = AssetDir+ "Transparent/";
+    public const string AssetDir = "Assets/Res/Asset/";
+    public const string AtlasDir = "Assets/Res/Atlas/";
 
-    public static string OpaqueAtlasDir = AtlasDir + "Opaque/";
-    public static string TransparentAtlasDir = AtlasDir + "Transparent/";
+    public const string OpaqueAssetDir = AssetDir+"Opaque/";
+    public const string TransparentAssetDir = AssetDir+ "Transparent/";
+
+    public const string OpaqueAtlasDir = AtlasDir + "Opaque/";
+    public const string TransparentAtlasDir = AtlasDir + "Transparent/";
 
 
-    public static string OpaqueAssetNamePrefix = "opaque_asset_";
-    public static string OpaqueAtlasnamePrefix = "opaque_atlas_";
+    public const string OpaqueAssetNamePrefix = "opaque_asset_";
+    public const string OpaqueAtlasnamePrefix = "opaque_atlas_";
 
-    public static string TransparentAssetNamePrefix = "transparent_asset_";
-    public static string TransparentAtlasNamePrefix = "transparent_atlas_";
+    public const string TransparentAssetNamePrefix = "transparent_asset_";
+    public const string TransparentAtlasNamePrefix = "transparent_atlas_";
 }
