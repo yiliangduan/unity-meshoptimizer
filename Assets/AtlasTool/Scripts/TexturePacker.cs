@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -19,13 +18,18 @@ public class TexturePacker  {
             return;
         }
 
-        string[] files = Directory.GetFiles(textureDir, "*.png");
+        string[] pngFiles = Directory.GetFiles(textureDir, "*.png");
+        string[] jpgFiles = Directory.GetFiles(textureDir, "*.jpg");
+
+        List<string> texFiles = new List<string>(pngFiles.Length+jpgFiles.Length);
+        texFiles.AddRange(pngFiles);
+        texFiles.AddRange(jpgFiles);
 
         List<Texture2D> textureList = new List<Texture2D>();
 
-        for (int i=0; i< files.Length; ++i)
+        for (int i=0; i< texFiles.Count; ++i)
         {
-            Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(files[i]);
+            Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texFiles[i]);
 
             if (null != texture)
             {
@@ -45,16 +49,46 @@ public class TexturePacker  {
 
         FilterSrcTexture(textureList);
 
+        List<Texture2D> transparentTexList = new List<Texture2D>();
+        List<Texture2D> opaqueTexList = new List<Texture2D>();
+
+        for (int i=0; i<textureList.Count; ++i)
+        {
+            Texture2D texture = textureList[i];
+            if (texture.alphaIsTransparency)
+            {
+                transparentTexList.Add(texture);
+            }
+            else
+            {
+                opaqueTexList.Add(texture);
+            }
+        }
+
+        PackAtlas(transparentTexList, true);
+
+        PackAtlas(opaqueTexList, false);
+
+        mAtlasList.Clear();
+    }
+
+    private void PackAtlas(List<Texture2D> textureList, bool isTransparent)
+    {
         int atlasIndex = 0;
+        int textureCount = textureList.Count;
+
+        textureList.Sort((a, b)=> { return a.width * a.height - b.width * b.height;});
 
         while (textureList.Count > 0)
         {
-            TextureAtlas atlas = ScriptableObject.CreateInstance<TextureAtlas>();
-            atlas.Init(limitWidth, limitHeight, false, "Assets/Res/", atlasIndex);
+            EditorUtility.DisplayProgressBar("", "Layout all texture to atlas ", (atlasIndex + 1) / textureCount);
 
-            for (int i=textureList.Count-1; i>=0; --i)
+            TextureAtlas atlas = ScriptableObject.CreateInstance<TextureAtlas>();
+            atlas.Init(mLimitWidth, mLimitHeight, false, atlasIndex, isTransparent);
+
+            for (int i = textureList.Count - 1; i >= 0; --i)
             {
-                if(atlas.AddTexture(textureList[i]))
+                if (atlas.AddTexture(textureList[i]))
                 {
                     textureList.RemoveAt(i);
                 }
@@ -64,10 +98,14 @@ public class TexturePacker  {
             atlasIndex++;
         }
 
-        for (int i=0; i<mAtlasList.Count; ++i)
+        for (int i = 0; i < mAtlasList.Count; ++i)
         {
+            EditorUtility.DisplayProgressBar("", "Pack atlas ", (i + 1) / mAtlasList.Count);
+
             mAtlasList[i].Pack();
         }
+
+        EditorUtility.ClearProgressBar();
     }
 
     /// <summary>

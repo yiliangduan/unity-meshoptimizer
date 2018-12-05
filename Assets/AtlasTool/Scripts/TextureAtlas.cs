@@ -5,13 +5,24 @@ using UnityEngine;
 
 public class TextureAtlas : ScriptableObject {
 
+    #region Asset
+    [HideInInspector]
     public List<TextureAtlasElement> ElementList = new List<TextureAtlasElement>();
 
+    [HideInInspector]
     public int Width;
+
+    [HideInInspector]
     public int Height;
 
-    private string mOutPutDir;
+    [HideInInspector]
+    public Texture2D Atlas;
 
+    [HideInInspector]
+    public bool IsTransparent;
+    #endregion
+
+    #region Data
     private string mAssetPath;
     private string mAtlasPath;
 
@@ -20,11 +31,12 @@ public class TextureAtlas : ScriptableObject {
     private bool bDirty;
     private bool mAllowFlip;
 
-    private Texture2D mAtlas;
+    private int mIndex;
 
-    private MaxRectsBinPack.FreeRectChoiceHeuristic mPackStrategy= MaxRectsBinPack.FreeRectChoiceHeuristic.RectBestShortSideFit;
+    private MaxRectsBinPack.FreeRectChoiceHeuristic mPackStrategy= MaxRectsBinPack.FreeRectChoiceHeuristic.RectBestAreaFit;
+    #endregion
 
-    public void Init(int width, int height, bool allowFlip, string outputDir, int index)
+    public void Init(int width, int height, bool allowFlip, int index, bool isTransparent)
     {
         mMaxRectsBinPack = new MaxRectsBinPack(width, height, allowFlip);
 
@@ -33,17 +45,45 @@ public class TextureAtlas : ScriptableObject {
 
         mAllowFlip = allowFlip;
 
-        mOutPutDir = outputDir;
+        IsTransparent = isTransparent;
 
-        string assetDir = outputDir + "Asset/";
-        CreateDir(assetDir);
+        if (isTransparent)
+        {
+            mAssetPath = AtlasConfig.TransparentAssetDir + AtlasConfig.TransparentAssetNamePrefix + index + ".asset";
 
-        mAssetPath = assetDir + "atlas_" + index + ".asset";
+            if (!Directory.Exists(AtlasConfig.TransparentAssetDir))
+            {
+                Directory.CreateDirectory(AtlasConfig.TransparentAssetDir);
+            }
+        }
+        else
+        {
+            mAssetPath = AtlasConfig.OpaqueAssetDir + AtlasConfig.OpaqueAssetNamePrefix + index + ".asset";
 
-        string atlasDir = outputDir + "Atlas/";
-        CreateDir(atlasDir);
+            if (!Directory.Exists(AtlasConfig.OpaqueAssetDir))
+            {
+                Directory.CreateDirectory(AtlasConfig.OpaqueAssetDir);
+            }
+        }
 
-        mAtlasPath = atlasDir + "atlas_" +index + ".png";
+        if (isTransparent)
+        {
+            mAtlasPath = AtlasConfig.TransparentAtlasDir + AtlasConfig.TransparentAtlasNamePrefix + index + ".png";
+
+            if (!Directory.Exists(AtlasConfig.TransparentAtlasDir))
+            {
+                Directory.CreateDirectory(AtlasConfig.TransparentAtlasDir);
+            }
+        }
+        else
+        {
+            mAtlasPath = AtlasConfig.OpaqueAtlasDir + AtlasConfig.OpaqueAtlasnamePrefix + index + ".jpg";
+
+            if (!Directory.Exists(AtlasConfig.OpaqueAtlasDir))
+            {
+                Directory.CreateDirectory(AtlasConfig.OpaqueAtlasDir);
+            }
+        }
     }
 
     public void Pack()
@@ -56,7 +96,7 @@ public class TextureAtlas : ScriptableObject {
             }
 
             WriteTexture();
-
+             
             WriteAsset();
 
             bDirty = false;
@@ -105,25 +145,20 @@ public class TextureAtlas : ScriptableObject {
         atlas.SetPixels(defaultColors);
         atlas.Apply();
 
-        mAtlas = atlas;
+        Atlas = atlas;
 
         File.WriteAllBytes(mAtlasPath, atlas.EncodeToPNG());
+
+        AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+        AssetDatabase.SaveAssets();
     }
 
     private void WriteAsset()
     {
-        TextureAtlasAsset asset = ScriptableObject.CreateInstance<TextureAtlasAsset>();
-
-        if (null != asset)
-        {
-            asset.Elements = ElementList.ToArray();
-            asset.Atlas = AssetDatabase.LoadAssetAtPath<Texture2D>(mAtlasPath);
-            asset.Width = Width;
-            asset.Height = Height;
-
-            AssetDatabase.CreateAsset(asset, mAssetPath);
-            AssetDatabase.SaveAssets();
-        }
+        Atlas = AssetDatabase.LoadAssetAtPath<Texture2D>(mAtlasPath);
+        
+        AssetDatabase.CreateAsset(this, mAssetPath);
+        AssetDatabase.SaveAssets();
     }
 
     private void CreateDir(string dir)

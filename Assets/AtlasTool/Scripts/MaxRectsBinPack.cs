@@ -10,7 +10,7 @@ public class MaxRectsBinPack {
     /// <summary>
     /// 允许翻转
     /// </summary>
-    public bool bAllowFilp;
+    public bool bAllowFlip;
 
     /// <summary>
     /// 宽度
@@ -44,7 +44,7 @@ public class MaxRectsBinPack {
 
     public MaxRectsBinPack(int width, int height, bool allowFilp)
     {
-        bAllowFilp = allowFilp;
+        bAllowFlip = allowFilp;
         mWidth = width;
         mHeight = height;
 
@@ -74,13 +74,13 @@ public class MaxRectsBinPack {
             case FreeRectChoiceHeuristic.RectBestLongSideFit:
                  newNode = FindPositionForNewNodeBottomLeft(width, height, ref score1, ref score2);
                  break;
-            case FreeRectChoiceHeuristic.RectBestAreaFit:
+            case FreeRectChoiceHeuristic.RectContactPointRule:
                 newNode = FindPositionForNewNodeContactPoint(width, height, ref score1);
                 break;
             case FreeRectChoiceHeuristic.RectBottomLeftRule:
                 newNode = FindPositionForNewNodeBestLongSideFit(width, height, ref score1, ref score2);
                 break;
-            case FreeRectChoiceHeuristic.RectContactPointRule:
+            case FreeRectChoiceHeuristic.RectBestAreaFit:
                 newNode = FindPositionForNewNodeBestAreaFit(width, height, ref score1, ref score2);
                 break;
         }
@@ -182,7 +182,7 @@ public class MaxRectsBinPack {
                 }
             }
 
-            if (bAllowFilp && mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
+            if (bAllowFlip && mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
             {
                 int flippedLeftoverHoriz = (int)Mathf.Abs(mFreeRectRangles[i].width - height);
                 int flippedLeftoverVert = (int)Mathf.Abs(mFreeRectRangles[i].height - width);
@@ -240,7 +240,7 @@ public class MaxRectsBinPack {
                 }
             }
 
-            if (bAllowFilp && mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
+            if (bAllowFlip && mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
             {
                 int leftoverHoriz = (int)Mathf.Abs(mFreeRectRangles[i].width - height);
                 int leftoverVert = (int)Mathf.Abs(mFreeRectRangles[i].height - width);
@@ -294,7 +294,7 @@ public class MaxRectsBinPack {
                 }
             }
 
-            if (bAllowFilp && mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
+            if (bAllowFlip && mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
             {
                 int topSideY = (int)mFreeRectRangles[i].y + width;
                 if (topSideY < bestY || (topSideY == bestY && mFreeRectRangles[i].x < bestX))
@@ -340,7 +340,7 @@ public class MaxRectsBinPack {
                 }
             }
 
-            if (mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
+            if (bAllowFlip && mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
             {
                 int score = ContactPointScoreNode((int)mFreeRectRangles[i].x, (int)mFreeRectRangles[i].y, height, width);
 
@@ -394,7 +394,7 @@ public class MaxRectsBinPack {
                 }
             }
 
-            if (bAllowFilp && mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
+            if (bAllowFlip && mFreeRectRangles[i].width >= height && mFreeRectRangles[i].height >= width)
             {
                 int leftoverHoriz = (int)Mathf.Abs(mFreeRectRangles[i].width - height);
                 int leftoverVert = (int)Mathf.Abs(mFreeRectRangles[i].height - width);
@@ -439,7 +439,7 @@ public class MaxRectsBinPack {
 
             if (mUsedRectangles[i].y == y + height || mUsedRectangles[i].y + mUsedRectangles[i].height == y)
             {
-                score += CommonIntervalLength((int)mUsedRectangles[i].x, (int)(mUsedRectangles[i].x + mUsedRectangles[i].width), x, x + height);
+                score += CommonIntervalLength((int)mUsedRectangles[i].x, (int)(mUsedRectangles[i].x + mUsedRectangles[i].width), x, x + width);
             }
         }
 
