@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class TexturePackerEditor
 {
-    [MenuItem("Assets/Pack Texture")]
+    [MenuItem("Assets/Pack Texture(All Realign)")]
     public static void CombineTexture()
     {
         Object activeObject = Selection.activeObject;
@@ -17,7 +17,7 @@ public class TexturePackerEditor
 
             if (Directory.Exists(path))
             {
-                new TexturePacker().Pack(path, AtlasConfig.AtlasDefaultWidth, AtlasConfig.AtlasDefaultHeight);
+                TexturePacker.Pack(path, AtlasConfig.AtlasDefaultWidth, AtlasConfig.AtlasDefaultHeight, true);
             }
         }
     }
@@ -37,7 +37,7 @@ public class TexturePackerEditor
         return false;
     }
 
-    [MenuItem("Assets/Pack Texture(without change original)")]
+    [MenuItem("Assets/Pack Texture")]
     public static void CombineTextureWithoutChangeOriginal()
     {
         Object activeObject = Selection.activeObject;
@@ -48,12 +48,12 @@ public class TexturePackerEditor
 
             if (Directory.Exists(path))
             {
-                new TexturePacker().Pack(path, AtlasConfig.AtlasDefaultWidth, AtlasConfig.AtlasDefaultHeight);
+                TexturePacker.Pack(path, AtlasConfig.AtlasDefaultWidth, AtlasConfig.AtlasDefaultHeight, false);
             }
         }
     }
 
-    [MenuItem("Assets/Pack Texture(without change original)", true)]
+    [MenuItem("Assets/Pack Texture", true)]
     public static bool CombineTextureWithoutChangeOriginalCondition()
     {
         Object activeObject = Selection.activeObject;

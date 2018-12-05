@@ -1,13 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 public class TextureAtlas : ScriptableObject {
 
-    #region Asset
     [HideInInspector]
-    public List<TextureAtlasElement> ElementList = new List<TextureAtlasElement>();
+    public string AssetPath;
+
+    [HideInInspector]
+    public string AtlasPath;
+
+    [HideInInspector]
+    public bool IsTransparent;
+
+    [HideInInspector]
+    public bool AllowFlip;
 
     [HideInInspector]
     public int Width;
@@ -19,20 +28,13 @@ public class TextureAtlas : ScriptableObject {
     public Texture2D Atlas;
 
     [HideInInspector]
-    public bool IsTransparent;
-    #endregion
+    public List<TextureAtlasElement> ElementList = new List<TextureAtlasElement>();
 
-    #region Data
-    private string mAssetPath;
-    private string mAtlasPath;
+    private MaxRectsBinPack.FreeRectChoiceHeuristic mPackStrategy = MaxRectsBinPack.FreeRectChoiceHeuristic.RectContactPointRule;
 
     private MaxRectsBinPack mMaxRectsBinPack;
 
     private bool bDirty;
-    private bool mAllowFlip;
-
-    private MaxRectsBinPack.FreeRectChoiceHeuristic mPackStrategy= MaxRectsBinPack.FreeRectChoiceHeuristic.RectContactPointRule;
-    #endregion
 
     public void Init(int width, int height, bool allowFlip, bool isTransparent, string atlasName)
     {
@@ -41,64 +43,40 @@ public class TextureAtlas : ScriptableObject {
         Width = width;
         Height = height;
 
-        mAllowFlip = allowFlip;
+        AllowFlip = allowFlip;
 
         IsTransparent = isTransparent;
 
-        if (isTransparent)
-        {
-            atlasName = string.IsNullOrEmpty(atlasName) ? AtlasConfig.TransparentAssetNamePrefix + atlasName : atlasName;
-            mAssetPath = AtlasConfig.TransparentAssetDir + atlasName + ".asset";
+        AtlasPath = GetAtlasPath(isTransparent, atlasName);
+        AssetPath = GetAssetPath(isTransparent, atlasName);
+    }
 
-            if (!Directory.Exists(AtlasConfig.TransparentAssetDir))
+    /// <summary>
+    /// 在TextureAtlas从Asset实例化出来时，MaxRectsBinPack里面的数据是空的，这时把ElementList中的数据反排布到MaxRectsBinPack中
+    /// </summary>
+    public void Layout()
+    {
+        mMaxRectsBinPack = new MaxRectsBinPack(Width, Height, AllowFlip);
+
+        for (int i=0; i<ElementList.Count; ++i)
+        {
+            TextureAtlasElement element = ElementList[i];
+
+            if (null != element)
             {
-                Directory.CreateDirectory(AtlasConfig.TransparentAssetDir);
+                mMaxRectsBinPack.Layout(element.Offset.x, element.Offset.y, element.Tex.width, element.Tex.height);
             }
         }
-        else
-        {
-            atlasName = string.IsNullOrEmpty(atlasName) ? AtlasConfig.OpaqueAssetNamePrefix + atlasName : atlasName;
-            mAssetPath = AtlasConfig.OpaqueAssetDir + atlasName + ".asset";
 
-            if (!Directory.Exists(AtlasConfig.OpaqueAssetDir))
-            {
-                Directory.CreateDirectory(AtlasConfig.OpaqueAssetDir);
-            }
-        }
-
-        if (isTransparent)
-        {
-            atlasName = string.IsNullOrEmpty(atlasName) ? AtlasConfig.TransparentAtlasNamePrefix + atlasName : atlasName;
-            mAtlasPath = AtlasConfig.TransparentAtlasDir + atlasName + ".png";
-
-            if (!Directory.Exists(AtlasConfig.TransparentAtlasDir))
-            {
-                Directory.CreateDirectory(AtlasConfig.TransparentAtlasDir);
-            }
-        }
-        else
-        {
-            atlasName = string.IsNullOrEmpty(atlasName) ? AtlasConfig.OpaqueAtlasnamePrefix + atlasName : atlasName;
-            mAtlasPath = AtlasConfig.OpaqueAtlasDir + atlasName + ".jpg";
-
-            if (!Directory.Exists(AtlasConfig.OpaqueAtlasDir))
-            {
-                Directory.CreateDirectory(AtlasConfig.OpaqueAtlasDir);
-            }
-        }
+        bDirty = true;
     }
 
     public void Pack()
     {
         if (bDirty)
         {
-            if (File.Exists(mAssetPath))
-            {
-                File.Delete(mAssetPath);
-            }
-
             WriteTexture();
-             
+
             WriteAsset();
 
             bDirty = false;
@@ -149,22 +127,19 @@ public class TextureAtlas : ScriptableObject {
 
         Atlas = atlas;
 
-        File.WriteAllBytes(mAtlasPath, atlas.EncodeToPNG());
-
-        AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
-        AssetDatabase.SaveAssets();
+        File.WriteAllBytes(AtlasPath, atlas.EncodeToPNG());
     }
 
     private void WriteAsset()
     {
-        Atlas = AssetDatabase.LoadAssetAtPath<Texture2D>(mAtlasPath);
+        Atlas = AssetDatabase.LoadAssetAtPath<Texture2D>(AtlasPath);
 
-        if (null == this)
+        if (!File.Exists(AssetPath))
         {
-            Debug.LogError("WriteAsset this is null!");
+            AssetDatabase.CreateAsset(this, AssetPath);
         }
-        
-        AssetDatabase.CreateAsset(this, mAssetPath);
+
+        AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
         AssetDatabase.SaveAssets();
     }
 
@@ -198,25 +173,12 @@ public class TextureAtlas : ScriptableObject {
             {
                 Offset = new Vector2(rect.x, rect.y),
                 Tex = texture,
-                Scale = new Vector2(rect.width/texture.width, rect.height/texture.height)
+                Scale = new Vector2(rect.width / texture.width, rect.height / texture.height)
             };
 
             ElementList.Add(element);
 
             return true;
-        }
-    }
-
-    public void RemoveTexture(Texture2D texture)
-    {
-        for (int i = ElementList.Count - 1; i >= 0; --i)
-        {
-            if (ElementList[i].Tex == texture)
-            {
-                ElementList.RemoveAt(i);
-                bDirty = true;
-                break;
-            }
         }
     }
 
@@ -231,5 +193,100 @@ public class TextureAtlas : ScriptableObject {
         }
 
         return false;
+    }
+
+    public void RemoveElementAt(int index)
+    {
+        if (index >= 0 && index < ElementList.Count)
+        {
+            TextureAtlasElement element = ElementList[index];
+
+            //TODO MaxRectsBinPack remove it.
+
+            ElementList.RemoveAt(index);
+        }
+        else
+        {
+            Debug.LogError("Invalid index."+index);
+        }
+    }
+
+    public static string GetAssetPath(bool isTransparent, string assetName)
+    {
+        string assetPath;
+
+        if (isTransparent)
+        {
+            assetName = string.IsNullOrEmpty(assetName) ? AtlasConfig.TransparentAssetNamePrefix + assetName : assetName;
+            assetPath = AtlasConfig.TransparentAssetDir + "tp_" + assetName + ".asset";
+
+            if (!Directory.Exists(AtlasConfig.TransparentAssetDir))
+            {
+                Directory.CreateDirectory(AtlasConfig.TransparentAssetDir);
+            }
+        }
+        else
+        {
+            assetName = string.IsNullOrEmpty(assetName) ? AtlasConfig.OpaqueAssetNamePrefix + assetName : assetName;
+            assetPath = AtlasConfig.OpaqueAssetDir + "op_"+ assetName + ".asset";
+
+            if (!Directory.Exists(AtlasConfig.OpaqueAssetDir))
+            {
+                Directory.CreateDirectory(AtlasConfig.OpaqueAssetDir);
+            }
+        }
+
+        return assetPath;
+    }
+
+    public static string GetAtlasPath(bool isTransparent, string atlasName)
+    {
+        string atlasPath;
+
+        if (isTransparent)
+        {
+            atlasName = string.IsNullOrEmpty(atlasName) ? AtlasConfig.TransparentAtlasNamePrefix + atlasName : atlasName;
+            atlasPath = AtlasConfig.TransparentAtlasDir + "tp_"+ atlasName + ".png";
+
+            if (!Directory.Exists(AtlasConfig.TransparentAtlasDir))
+            {
+                Directory.CreateDirectory(AtlasConfig.TransparentAtlasDir);
+            }
+        }
+        else
+        {
+            atlasName = string.IsNullOrEmpty(atlasName) ? AtlasConfig.OpaqueAtlasnamePrefix + atlasName : atlasName;
+            atlasPath = AtlasConfig.OpaqueAtlasDir + "op_"+atlasName + ".jpg";
+
+            if (!Directory.Exists(AtlasConfig.OpaqueAtlasDir))
+            {
+                Directory.CreateDirectory(AtlasConfig.OpaqueAtlasDir);
+            }
+        }
+
+        return atlasPath;
+    }
+
+    public TextureAtlasElement GetElement(Texture2D texture)
+    {
+        for (int i = 0; i < ElementList.Count; ++i)
+        {
+            TextureAtlasElement element = ElementList[i];
+            if (null != element)
+            {
+                //防止出现同名但是图片对象不相同的情况(图片Unity格式不同，图片的TextureImporter的属性不同)，造成资源冗余
+                if (element.Tex.name == texture.name && element.Tex != texture)
+                {
+                    Debug.LogError("There are texture with the same name. " + element.Tex.name);
+                }
+
+                if (element.Tex == texture)
+                {
+                    return element;
+                }
+            }
+        }
+
+        return null;
     }
 }

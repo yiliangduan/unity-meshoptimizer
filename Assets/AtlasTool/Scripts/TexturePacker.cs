@@ -5,10 +5,14 @@ using UnityEngine;
 
 public class TexturePacker  {
 
-    private int mLimitWidth;
-    private int mLimitHeight;
-
-    public void Pack(string textureDir, int limitWidth, int limitHeight)
+    /// <summary>
+    /// 合并贴图
+    /// </summary>
+    /// <param name="textureDir">合并的贴图的目录</param>
+    /// <param name="atlasWidth">atlas的最大宽度</param>
+    /// <param name="atlasHeight">atlas的最大高度</param>
+    /// <param name="allRealign">是否全部重新排列，如果false，则之前合并了的贴图不会改变其相对排列位置，但是当前目录已经删除了的图片会被删除</param>
+    public static void Pack(string textureDir, int atlasWidth, int atlasHeight, bool allReLayout)
     {
         if (!Directory.Exists(textureDir))
         {
@@ -46,15 +50,20 @@ public class TexturePacker  {
             atlasName = string.Empty;
         }
 
-        Pack(textureList, atlasName, limitWidth, limitHeight);
+        Pack(textureList, atlasName, atlasWidth, atlasHeight, allReLayout);
     }
 
-    public void Pack(List<Texture2D> textureList, string atlasName, int limitWidth, int limitHeight)
+    /// <summary>
+    /// 合并贴图
+    /// </summary>
+    /// <param name="textureDir">合并的贴图的目录</param>
+    /// param name="atlasName">制定的atlas的文件名</param>
+    /// <param name="atlasWidth">atlas的最大宽度</param>
+    /// <param name="atlasHeight">atlas的最大高度</param>
+    /// <param name="allRealign">是否全部重新排列，如果false，则之前合并了的贴图不会改变其相对排列位置，但是当前目录已经删除了的图片会被删除</param>
+    public static void Pack(List<Texture2D> textureList, string atlasName, int atlasWidth, int atlasHeight, bool allReLayout)
     {
-        mLimitWidth = limitWidth;
-        mLimitHeight = limitHeight;
-
-        FilterSrcTexture(textureList);
+        FilterDontPackTexture(textureList, atlasWidth, atlasHeight);
 
         List<Texture2D> transparentTexList = new List<Texture2D>();
         List<Texture2D> opaqueTexList = new List<Texture2D>();
@@ -72,12 +81,21 @@ public class TexturePacker  {
             }
         }
 
-        PackAtlas(transparentTexList, atlasName, true);
+        PackAtlas(transparentTexList, atlasName, true, atlasWidth, atlasHeight);
 
-        PackAtlas(opaqueTexList, atlasName, false);
+        PackAtlas(opaqueTexList, atlasName, false, atlasWidth, atlasHeight);
     }
 
-    private List<TextureAtlas> PackAtlas(List<Texture2D> textureList, string atlasName, bool isTransparent)
+    /// <summary>
+    /// 合并贴图
+    /// </summary>
+    /// <param name="textureList"></param>
+    /// <param name="atlasName"></param>
+    /// <param name="isTransparent"></param>
+    /// <param name="atlasWidth"></param>
+    /// <param name="atlasHeight"></param>
+    /// <returns></returns>
+    private static List<TextureAtlas> PackAtlas(List<Texture2D> textureList, string atlasName, bool isTransparent, int atlasWidth, int atlasHeight)
     {
         int atlasIndex = 0;
         int textureCount = textureList.Count;
@@ -86,23 +104,76 @@ public class TexturePacker  {
 
         List<TextureAtlas> atlasList = new List<TextureAtlas>();
 
+        string fileName = string.Empty;
+
         while (textureList.Count > 0)
         {
             EditorUtility.DisplayProgressBar("", "Layout all texture to atlas ", (atlasIndex + 1) / textureCount);
 
-            TextureAtlas atlas = ScriptableObject.CreateInstance<TextureAtlas>();
-            atlas.Init(mLimitWidth, mLimitHeight, false, isTransparent, atlasName+"_"+ atlasIndex);
+            fileName = atlasName + "_" + atlasIndex;
 
-            for (int i = textureList.Count - 1; i >= 0; --i)
+            string assetPath = TextureAtlas.GetAssetPath(isTransparent, fileName);
+
+            TextureAtlas atlas;
+
+            if (File.Exists(assetPath))
             {
-                if (atlas.AddTexture(textureList[i]))
+                atlas = AssetDatabase.LoadAssetAtPath<TextureAtlas>(assetPath);
+
+                if (null == atlas)
                 {
-                    textureList.RemoveAt(i);
+                    Debug.LogError("Load asset failed. " + assetPath);
+                    return null;
                 }
+
+                atlas.Layout();
+
+                //如果文件夹下的图片已经删除了，则把Asset中保存的该文件的信息也删除
+                for (int i= atlas.ElementList.Count-1; i>0; --i)
+                {
+                    bool isFound = false;
+
+                    for (int j=0; j< textureList.Count; ++j)
+                    {
+                        if (atlas.ElementList[i].Tex == textureList[j])
+                        {
+                            isFound = true;
+                            break;
+                        }
+                    }
+
+                    if (!isFound)
+                    {
+                        atlas.RemoveElementAt(i);
+                    }
+                }
+            }
+            else
+            {
+                atlas = ScriptableObject.CreateInstance<TextureAtlas>();
+                atlas.Init(atlasWidth, atlasHeight, false, isTransparent, fileName);
             }
 
             atlasList.Add(atlas);
             atlasIndex++;
+
+            //新增图片
+            for (int i = textureList.Count - 1; i >= 0; --i)
+            {
+                TextureAtlasElement element = atlas.GetElement(textureList[i]);
+
+                if (null != element)
+                {
+                    textureList.RemoveAt(i);
+                }
+                else
+                { 
+                    if (atlas.AddTexture(textureList[i]))
+                    {
+                        textureList.RemoveAt(i);
+                    }
+                }
+            }
         }
 
         for (int i = 0; i < atlasList.Count; ++i)
@@ -118,15 +189,15 @@ public class TexturePacker  {
     }
 
     /// <summary>
-    /// 过滤Size比Atlas的Size还要大的Texture
+    /// 过滤不需要合并的贴图
     /// </summary>
-    private void FilterSrcTexture(List<Texture2D> textureList)
+    private static void FilterDontPackTexture(List<Texture2D> textureList, int atlasWidth, int atlasHeight)
     {
         for (int i = textureList.Count-1; i > 0; --i)
         {
             Texture2D texture = textureList[i];
 
-            if (null == texture || texture.width > mLimitWidth || texture.height > mLimitHeight)
+            if (null == texture || texture.width > atlasWidth || texture.height > atlasHeight)
             {
                 textureList.RemoveAt(i);
             }

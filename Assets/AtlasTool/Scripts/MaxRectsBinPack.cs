@@ -2,6 +2,7 @@
 // 参考: https://github.com/juj/RectangleBinPack
 //
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -146,6 +147,33 @@ public class MaxRectsBinPack {
             dst.Add(bestNode);
             rects.RemoveAt(bestRectIndex);
         }
+    }
+
+    public bool Layout(float x, float y, int width, int height)
+    {
+        if (width <= 0 || height <= 0)
+            return false;
+
+        Rect newNode = new Rect(x, y, width, height);
+
+        int numRectanglesToProcess = mFreeRectRangles.Count;
+
+        for (int i = 0; i < numRectanglesToProcess; ++i)
+        {
+            if (SplitFreeNode(mFreeRectRangles[i], newNode))
+            {
+                mFreeRectRangles.RemoveAt(i);
+
+                --i;
+                --numRectanglesToProcess;
+            }
+        }
+
+        PruneFreeList();
+
+        mUsedRectangles.Add(newNode);
+
+        return true;
     }
 
     /// <summary>
