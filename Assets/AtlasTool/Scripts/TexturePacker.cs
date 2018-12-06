@@ -67,6 +67,8 @@ namespace Elang.Tools
         {
             FilterDontPackTexture(textureList, atlasWidth, atlasHeight);
 
+            SetTextureReadable(textureList);
+
             List<Texture2D> transparentTexList = new List<Texture2D>();
             List<Texture2D> opaqueTexList = new List<Texture2D>();
 
@@ -204,6 +206,28 @@ namespace Elang.Tools
                     textureList.RemoveAt(i);
                 }
             }
+        }
+
+        public static void SetTextureReadable(List<Texture2D> textureList)
+        {
+            int textureCount = textureList.Count;
+
+            for (int i=0; i<textureList.Count; ++i)
+            {
+                EditorUtility.DisplayProgressBar("", "Set texture readable. ", (float)i / textureCount);
+
+                string path = AssetDatabase.GetAssetPath(textureList[i]);
+
+                TextureImporter importer = (TextureImporter)TextureImporter.GetAtPath(path);
+
+                if (!importer.isReadable)
+                {
+                    importer.isReadable = true;
+                    AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+                }
+            }
+
+            EditorUtility.ClearProgressBar();
         }
     }
 }

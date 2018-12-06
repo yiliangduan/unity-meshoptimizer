@@ -1,6 +1,9 @@
 ﻿
+using System.Runtime.Serialization;
+
 namespace Elang.Tools
 {
+    [System.Serializable]
     public struct IntRect
     {
         public int x;
@@ -43,9 +46,20 @@ namespace Elang.Tools
                    height == otherRect.height;
         }
 
+        public override int GetHashCode()
+        {
+            return x.GetHashCode() ^ (width.GetHashCode() << 2) ^ (y.GetHashCode() >> 2) ^ (height.GetHashCode() >> 1);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("({0}, {1}, {2}, {3})", x, y, width, height);
+        }
+
         public static IntRect zero = new IntRect(0, 0, 0, 0);
     }
 
+    [System.Serializable]
     public struct IntVector2
     {
         public int x;
@@ -55,6 +69,37 @@ namespace Elang.Tools
         {
             this.x = x;
             this.y = y;
+        }
+
+        public static bool operator ==(IntVector2 vector1, IntVector2 vector2)
+        {
+            return vector1.x == vector2.x &&
+                   vector1.y == vector2.y;
+        }
+
+        public static bool operator !=(IntVector2 vector1, IntVector2 vector2)
+        {
+            return vector1.x != vector2.x ||
+                   vector1.y != vector2.y;
+        }
+
+        public override bool Equals(object obj)
+        {
+            IntVector2 otherVector2 = (IntVector2)obj;
+
+            return x == otherVector2.x &&
+                   y == otherVector2.y;
+        }
+
+        public override int GetHashCode()
+        {
+            return x.GetHashCode() ^ (y.GetHashCode() << 2);
+        }
+
+
+        public override string ToString()
+        {
+            return string.Format("{0}, {1}", x, y);
         }
     }
 }

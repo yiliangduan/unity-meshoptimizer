@@ -178,7 +178,8 @@ namespace Elang.Tools
                 {
                     Offset = new IntVector2(rect.x, rect.y),
                     Tex = texture,
-                    Scale = new IntVector2(rect.width / texture.width, rect.height / texture.height)
+                    Scale = new IntVector2(rect.width / texture.width, rect.height / texture.height),
+                    Size = new IntVector2(texture.width, texture.height)
                 };
 
                 ElementList.Add(element);
