@@ -149,7 +149,7 @@ public class MaxRectsBinPack {
         }
     }
 
-    public bool Layout(float x, float y, int width, int height)
+    public bool Layout(int x, int y, int width, int height)
     {
         if (width <= 0 || height <= 0)
             return false;
@@ -174,6 +174,26 @@ public class MaxRectsBinPack {
         mUsedRectangles.Add(newNode);
 
         return true;
+    }
+
+    public bool RemoveRect(int x, int y, int width, int height)
+    {
+        if (width <= 0 || height <= 0)
+            return false;
+
+        for (int i=0; i<mUsedRectangles.Count; ++i)
+        {
+            Rect usedNode = mUsedRectangles[i];
+
+            if (x == usedNode.x && y == usedNode.y && width == usedNode.width && height == usedNode.height)
+            {
+                mUsedRectangles.RemoveAt(i);
+                mFreeRectRangles.Add(usedNode);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

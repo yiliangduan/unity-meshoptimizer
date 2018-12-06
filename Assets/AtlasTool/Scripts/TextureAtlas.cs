@@ -64,7 +64,7 @@ public class TextureAtlas : ScriptableObject {
 
             if (null != element)
             {
-                mMaxRectsBinPack.Layout(element.Offset.x, element.Offset.y, element.Tex.width, element.Tex.height);
+                mMaxRectsBinPack.Layout((int)element.Offset.x, (int)element.Offset.y, element.Tex.width, element.Tex.height);
             }
         }
 
@@ -200,8 +200,6 @@ public class TextureAtlas : ScriptableObject {
         if (index >= 0 && index < ElementList.Count)
         {
             TextureAtlasElement element = ElementList[index];
-
-            //TODO MaxRectsBinPack remove it.
 
             ElementList.RemoveAt(index);
         }

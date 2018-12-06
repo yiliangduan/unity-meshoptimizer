@@ -9,8 +9,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d0de7f3bff914ff48b982d06386196e8, type: 3}
-  m_Name: aaa_0
+  m_Name: op_aaa_0
   m_EditorClassIdentifier: 
+  AssetPath: Assets/Res/Asset/Opaque/op_aaa_0.asset
+  AtlasPath: Assets/Res/Atlas/Opaque/op_aaa_0.jpg
+  IsTransparent: 0
+  AllowFlip: 0
+  Width: 1024
+  Height: 1024
+  Atlas: {fileID: 2800000, guid: 6024748f560b0a948b4adfe3cff511fb, type: 3}
   ElementList:
   - Tex: {fileID: 2800000, guid: dba89707d640ff14b96540450d4d11fa, type: 3}
     Offset: {x: 0, y: 0}
@@ -42,7 +49,3 @@ MonoBehaviour:
   - Tex: {fileID: 2800000, guid: d93264b38eed33b458fd5c871571ea53, type: 3}
     Offset: {x: 512, y: 640}
     Scale: {x: 1, y: 1}
-  Width: 1024
-  Height: 1024
-  Atlas: {fileID: 2800000, guid: e18410e9f94cdb042bfd0f4b5a169ab3, type: 3}
-  IsTransparent: 0
