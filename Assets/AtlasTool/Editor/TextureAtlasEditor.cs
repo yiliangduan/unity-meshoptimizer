@@ -40,8 +40,11 @@ namespace Elang.Tools
 
                     if (bShowElementTransform)
                     {
-                        element.Offset = EditorGUILayout.Vector2Field("Offset", element.Offset);
-                        element.Scale = EditorGUILayout.Vector2Field("Scale", element.Scale);
+                        Vector2 offset = new Vector2(element.Offset.x, element.Offset.y);
+                        EditorGUILayout.Vector2Field("Offset", offset);
+
+                        Vector2 scale = new Vector2(element.Scale.x, element.Scale.y);
+                        EditorGUILayout.Vector2Field("Scale", scale);
                     }
                 }
             }

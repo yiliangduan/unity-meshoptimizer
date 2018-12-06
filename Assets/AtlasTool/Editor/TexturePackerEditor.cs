@@ -1,70 +1,71 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-public class TexturePackerEditor
+namespace Elang.Tools
 {
-    [MenuItem("Assets/Pack Texture(All Realign)")]
-    public static void CombineTexture()
+    public class TexturePackerEditor
     {
-        Object activeObject = Selection.activeObject;
-
-        if (null != activeObject)
+        [MenuItem("Assets/Pack Texture(All ReLayout)")]
+        public static void CombineTexture()
         {
-            string path = AssetDatabase.GetAssetPath(activeObject);
+            Object activeObject = Selection.activeObject;
 
-            if (Directory.Exists(path))
+            if (null != activeObject)
             {
-                TexturePacker.Pack(path, AtlasConfig.AtlasDefaultWidth, AtlasConfig.AtlasDefaultHeight, true);
+                string path = AssetDatabase.GetAssetPath(activeObject);
+
+                if (Directory.Exists(path))
+                {
+                    TexturePacker.Pack(path, AtlasConfig.AtlasDefaultWidth, AtlasConfig.AtlasDefaultHeight, true);
+                }
             }
         }
-    }
 
-    [MenuItem("Assets/Pack Texture", true)]
-    public static bool CombineTextureCondition()
-    {
-        Object activeObject = Selection.activeObject;
-
-        if (null != activeObject)
+        [MenuItem("Assets/Pack Texture", true)]
+        public static bool CombineTextureCondition()
         {
-            string path = AssetDatabase.GetAssetPath(activeObject);
+            Object activeObject = Selection.activeObject;
 
-            return Directory.Exists(path);
+            if (null != activeObject)
+            {
+                string path = AssetDatabase.GetAssetPath(activeObject);
+
+                return Directory.Exists(path);
+            }
+
+            return false;
         }
 
-        return false;
-    }
-
-    [MenuItem("Assets/Pack Texture")]
-    public static void CombineTextureWithoutChangeOriginal()
-    {
-        Object activeObject = Selection.activeObject;
-
-        if (null != activeObject)
+        [MenuItem("Assets/Pack Texture")]
+        public static void CombineTextureWithoutChangeOriginal()
         {
-            string path = AssetDatabase.GetAssetPath(activeObject);
+            Object activeObject = Selection.activeObject;
 
-            if (Directory.Exists(path))
+            if (null != activeObject)
             {
-                TexturePacker.Pack(path, AtlasConfig.AtlasDefaultWidth, AtlasConfig.AtlasDefaultHeight, false);
+                string path = AssetDatabase.GetAssetPath(activeObject);
+
+                if (Directory.Exists(path))
+                {
+                    TexturePacker.Pack(path, AtlasConfig.AtlasDefaultWidth, AtlasConfig.AtlasDefaultHeight, false);
+                }
             }
         }
-    }
 
-    [MenuItem("Assets/Pack Texture", true)]
-    public static bool CombineTextureWithoutChangeOriginalCondition()
-    {
-        Object activeObject = Selection.activeObject;
-
-        if (null != activeObject)
+        [MenuItem("Assets/Pack Texture", true)]
+        public static bool CombineTextureWithoutChangeOriginalCondition()
         {
-            string path = AssetDatabase.GetAssetPath(activeObject);
+            Object activeObject = Selection.activeObject;
 
-            return Directory.Exists(path);
+            if (null != activeObject)
+            {
+                string path = AssetDatabase.GetAssetPath(activeObject);
+
+                return Directory.Exists(path);
+            }
+
+            return false;
         }
-
-        return false;
     }
 }

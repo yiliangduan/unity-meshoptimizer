@@ -1,11 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-[System.Serializable]
-public class TextureAtlasElement
+
+namespace Elang.Tools
 {
-    public Texture2D Tex;
-    public Vector2 Offset;
-    public Vector2 Scale;
+    [System.Serializable]
+    public class TextureAtlasElement
+    {
+        public Texture2D Tex;
+
+        public IntVector2 Offset;
+        public IntVector2 Scale;
+        public IntVector2 Size;
+    }
 }
