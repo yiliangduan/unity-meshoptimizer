@@ -1,15 +1,20 @@
 ﻿
-using System.Runtime.Serialization;
+using System;
+using UnityEngine;
 
 namespace Elang.Tools
 {
-    [System.Serializable]
+    [Serializable]
     public struct IntRect
     {
+        [NonSerialized]
         public int x;
+        [NonSerialized]
         public int y;
 
+        [NonSerialized]
         public int width;
+        [NonSerialized]
         public int height;
 
         public IntRect(int x, int y, int width, int height)
@@ -22,9 +27,9 @@ namespace Elang.Tools
 
         public static bool operator ==(IntRect rect1, IntRect rect2)
         {
-            return rect1.x == rect2.x && 
-                   rect1.y == rect2.y && 
-                   rect1.width == rect2.width && 
+            return rect1.x == rect2.x &&
+                   rect1.y == rect2.y &&
+                   rect1.width == rect2.width &&
                    rect1.height == rect2.height;
         }
 
@@ -53,53 +58,9 @@ namespace Elang.Tools
 
         public override string ToString()
         {
-            return string.Format("({0}, {1}, {2}, {3})", x, y, width, height);
+            return string.Format("({0},{1},{2},{3})", x, y, width, height);
         }
 
-        public static IntRect zero = new IntRect(0, 0, 0, 0);
-    }
-
-    [System.Serializable]
-    public struct IntVector2
-    {
-        public int x;
-        public int y;
-
-        public IntVector2(int x, int y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-
-        public static bool operator ==(IntVector2 vector1, IntVector2 vector2)
-        {
-            return vector1.x == vector2.x &&
-                   vector1.y == vector2.y;
-        }
-
-        public static bool operator !=(IntVector2 vector1, IntVector2 vector2)
-        {
-            return vector1.x != vector2.x ||
-                   vector1.y != vector2.y;
-        }
-
-        public override bool Equals(object obj)
-        {
-            IntVector2 otherVector2 = (IntVector2)obj;
-
-            return x == otherVector2.x &&
-                   y == otherVector2.y;
-        }
-
-        public override int GetHashCode()
-        {
-            return x.GetHashCode() ^ (y.GetHashCode() << 2);
-        }
-
-
-        public override string ToString()
-        {
-            return string.Format("{0}, {1}", x, y);
-        }
+        public static IntRect zero  { get { return new IntRect(0, 0, 0, 0); } }
     }
 }

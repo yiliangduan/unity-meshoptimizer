@@ -133,6 +133,9 @@ namespace Elang.Tools
             Atlas = atlas;
 
             File.WriteAllBytes(AtlasPath, atlas.EncodeToPNG());
+
+            AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+            AssetDatabase.SaveAssets();
         }
 
         private void WriteAsset()
