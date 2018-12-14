@@ -17,35 +17,105 @@ MonoBehaviour:
   AllowFlip: 0
   Width: 1024
   Height: 1024
-  Atlas: {fileID: 2800000, guid: 6024748f560b0a948b4adfe3cff511fb, type: 3}
+  Atlas: {fileID: 0}
   ElementList:
   - Tex: {fileID: 2800000, guid: dba89707d640ff14b96540450d4d11fa, type: 3}
-    Offset: {x: 0, y: 0}
-    Scale: {x: 1, y: 1}
+    Offset:
+      x: 0
+      y: 0
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 512
+      y: 512
   - Tex: {fileID: 2800000, guid: 7564a003cbb956c41a15bb2db2fdbfd2, type: 3}
-    Offset: {x: 512, y: 0}
-    Scale: {x: 1, y: 1}
+    Offset:
+      x: 512
+      y: 0
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 512
+      y: 256
   - Tex: {fileID: 2800000, guid: f7c703850d0ec294cad1cbbe07a16956, type: 3}
-    Offset: {x: 512, y: 256}
-    Scale: {x: 1, y: 1}
+    Offset:
+      x: 512
+      y: 256
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 512
+      y: 256
   - Tex: {fileID: 2800000, guid: 75c0b64e2dcaec54bbd77cf1c48f4bdb, type: 3}
-    Offset: {x: 0, y: 512}
-    Scale: {x: 1, y: 1}
+    Offset:
+      x: 0
+      y: 512
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 512
+      y: 256
   - Tex: {fileID: 2800000, guid: 66d9ee43e29a21341b5ebd70a3d915ec, type: 3}
-    Offset: {x: 0, y: 768}
-    Scale: {x: 1, y: 1}
+    Offset:
+      x: 0
+      y: 768
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 256
+      y: 256
   - Tex: {fileID: 2800000, guid: a21172ab833340b478cfc78cb175976f, type: 3}
-    Offset: {x: 512, y: 512}
-    Scale: {x: 1, y: 1}
+    Offset:
+      x: 512
+      y: 512
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 256
+      y: 128
   - Tex: {fileID: 2800000, guid: 313a59ffaa81fc44797f1a2a1283d534, type: 3}
-    Offset: {x: 768, y: 512}
-    Scale: {x: 1, y: 1}
+    Offset:
+      x: 768
+      y: 512
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 256
+      y: 128
   - Tex: {fileID: 2800000, guid: b5b080f110ed5c344b88d2577af1bc82, type: 3}
-    Offset: {x: 256, y: 768}
-    Scale: {x: 1, y: 1}
+    Offset:
+      x: 256
+      y: 768
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 256
+      y: 128
   - Tex: {fileID: 2800000, guid: d75bb9ea6976f5f4b98bbd417c0b6f34, type: 3}
-    Offset: {x: 256, y: 896}
-    Scale: {x: 1, y: 1}
+    Offset:
+      x: 256
+      y: 896
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 256
+      y: 128
   - Tex: {fileID: 2800000, guid: d93264b38eed33b458fd5c871571ea53, type: 3}
-    Offset: {x: 512, y: 640}
-    Scale: {x: 1, y: 1}
+    Offset:
+      x: 512
+      y: 640
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 64
+      y: 64

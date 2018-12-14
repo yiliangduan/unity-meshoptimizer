@@ -31,7 +31,7 @@ namespace Elang.Tools
         [HideInInspector]
         public List<TextureAtlasElement> ElementList = new List<TextureAtlasElement>();
 
-        private MaxRectsBinPack.FreeRectChoiceHeuristic mPackStrategy = MaxRectsBinPack.FreeRectChoiceHeuristic.RectContactPointRule;
+        private FreeRectChoiceHeuristic mPackStrategy = FreeRectChoiceHeuristic.RectContactPointRule;
 
         private MaxRectsBinPack mMaxRectsBinPack;
 

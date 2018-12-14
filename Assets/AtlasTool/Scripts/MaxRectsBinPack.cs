@@ -7,6 +7,15 @@ using UnityEngine;
 
 namespace Elang.Tools
 {
+    public enum FreeRectChoiceHeuristic
+    {
+        RectBestShortSideFit, /// 在空闲空间中找到一块 短边(取width, height其中短的) 填充率最高的剩余空间。
+        RectBestLongSideFit, /// 在空闲空间中找到一块 长边(取width, height其中长的) 填充率最高的剩余空间填充
+        RectBestAreaFit, /// 根据面积占空闲块的比例来取最优
+        RectBottomLeftRule, /// 在空闲空间中按照找到的剩余空间块的左下角坐标来计算，加上高度之后取y值越小得那个空闲块
+        RectContactPointRule /// 在空闲空间中根据长，宽的比例相加结果为因子来计算最优
+    };
+
     public class MaxRectsBinPack
     {
         /// <summary>
@@ -25,24 +34,14 @@ namespace Elang.Tools
         public int mHeight;
 
         /// <summary>
-        /// 已经使用的IntRect
+        /// 已经使用的Rect
         /// </summary>
         private List<IntRect> mUsedRectangles = new List<IntRect>();
 
         /// <summary>
-        /// 还未使用的IntRect
+        /// 还未使用的Rect
         /// </summary>
         private List<IntRect> mFreeRectRangles = new List<IntRect>();
-
-
-        public enum FreeRectChoiceHeuristic
-        {
-            RectBestShortSideFit, ///< -BSSF: Positions the rectangle against the short side of a free rectangle into which it fits the best.
-            RectBestLongSideFit, ///< -BLSF: Positions the rectangle against the long side of a free rectangle into which it fits the best.
-            RectBestAreaFit, ///< -BAF: Positions the rectangle into the smallest free rect into which it fits.
-            RectBottomLeftRule, ///< -BL: Does the Tetris placement.
-            RectContactPointRule ///< -CP: Choosest the placement where the rectangle touches other rects as much as possible.
-        };
 
         public MaxRectsBinPack(int width, int height, bool allowFilp)
         {
@@ -198,7 +197,7 @@ namespace Elang.Tools
         }
 
         /// <summary>
-        /// 找到一块 短边(取width, height其中短的) 填充率最高的剩余空间。
+        /// 在空闲空间中找到一块 短边(取width, height其中短的) 填充率最高的剩余空间。
         /// </summary>
         /// <returns></returns>
         public IntRect FindPositionForNewNodeBestShortSideFit(int width, int height, ref int bestShortSideFit, ref int bestLongSideFit)
@@ -257,7 +256,7 @@ namespace Elang.Tools
         }
 
         /// <summary>
-        /// 找到一块 长边(取width, height其中长的) 填充率最高的剩余空间填充
+        /// 在空闲空间中找到一块 长边(取width, height其中长的) 填充率最高的剩余空间填充
         /// </summary>
         public IntRect FindPositionForNewNodeBestLongSideFit(int width, int height, ref int bestShortSideFit, ref int bestLongSideFit)
         {
@@ -316,7 +315,7 @@ namespace Elang.Tools
 
 
         /// <summary>
-        /// 按照找到的剩余空间块的左下角坐标来计算，加上高度之后取y值越小得那个空闲块
+        /// 在空闲空间中按照找到的剩余空间块的左下角坐标来计算，加上高度之后取y值越小得那个空闲块
         /// </summary>
         public IntRect FindPositionForNewNodeBottomLeft(int width, int height, ref int bestX, ref int bestY)
         {
@@ -364,7 +363,7 @@ namespace Elang.Tools
         }
 
         /// <summary>
-        /// 根据长，宽的比例相加结果为因子来计算最优
+        /// 在空闲空间中根据长，宽的比例相加结果为因子来计算最优
         /// </summary>
         public IntRect FindPositionForNewNodeContactPoint(int width, int height, ref int bestContactScore)
         {
