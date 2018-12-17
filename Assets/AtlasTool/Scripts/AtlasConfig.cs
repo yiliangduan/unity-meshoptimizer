@@ -2,7 +2,6 @@
 {
     public class AtlasConfig
     {
-
         public const int AtlasDefaultWidth = 1024;
         public const int AtlasDefaultHeight = 1024;
 

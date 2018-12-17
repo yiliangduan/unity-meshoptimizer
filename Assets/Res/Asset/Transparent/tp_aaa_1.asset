@@ -17,7 +17,7 @@ MonoBehaviour:
   AllowFlip: 0
   Width: 1024
   Height: 1024
-  Atlas: {fileID: 0}
+  Atlas: {fileID: 2800000, guid: 1d6188110414f26499f083545b989d19, type: 3}
   ElementList:
   - Tex: {fileID: 2800000, guid: 2a23f2945317fa34aa8e186d62b7d86e, type: 3}
     Offset:
@@ -29,7 +29,7 @@ MonoBehaviour:
     Size:
       x: 632
       y: 300
-  - Tex: {fileID: 2800000, guid: e7879bbdf8a469648aa58b51bc74f5b1, type: 3}
+  - Tex: {fileID: 2800000, guid: 349b74d5085649547952eff894d56ad3, type: 3}
     Offset:
       x: 0
       y: 300
@@ -39,7 +39,7 @@ MonoBehaviour:
     Size:
       x: 256
       y: 256
-  - Tex: {fileID: 2800000, guid: dcfac49c59075cd41839fa592f5c9843, type: 3}
+  - Tex: {fileID: 2800000, guid: af9f8acf3c327fc4186e715b287fa56a, type: 3}
     Offset:
       x: 632
       y: 0
@@ -49,7 +49,7 @@ MonoBehaviour:
     Size:
       x: 256
       y: 256
-  - Tex: {fileID: 2800000, guid: 84c5edac4d999644bae0ff8f756914b0, type: 3}
+  - Tex: {fileID: 2800000, guid: e7879bbdf8a469648aa58b51bc74f5b1, type: 3}
     Offset:
       x: 0
       y: 556
@@ -59,7 +59,7 @@ MonoBehaviour:
     Size:
       x: 256
       y: 256
-  - Tex: {fileID: 2800000, guid: 904fdd5581d1b9c428b12c4ee62495f7, type: 3}
+  - Tex: {fileID: 2800000, guid: 84c5edac4d999644bae0ff8f756914b0, type: 3}
     Offset:
       x: 256
       y: 300
@@ -69,10 +69,20 @@ MonoBehaviour:
     Size:
       x: 256
       y: 256
-  - Tex: {fileID: 2800000, guid: 349b74d5085649547952eff894d56ad3, type: 3}
+  - Tex: {fileID: 2800000, guid: 395c45260691d4743b42f63ad077ece9, type: 3}
     Offset:
       x: 256
       y: 556
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 256
+      y: 256
+  - Tex: {fileID: 2800000, guid: 904fdd5581d1b9c428b12c4ee62495f7, type: 3}
+    Offset:
+      x: 512
+      y: 300
     Scale:
       x: 1
       y: 1

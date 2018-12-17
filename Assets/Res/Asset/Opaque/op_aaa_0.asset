@@ -17,7 +17,7 @@ MonoBehaviour:
   AllowFlip: 0
   Width: 1024
   Height: 1024
-  Atlas: {fileID: 0}
+  Atlas: {fileID: 2800000, guid: 17dbb95fc2c9a7a43983167cf32b0159, type: 3}
   ElementList:
   - Tex: {fileID: 2800000, guid: dba89707d640ff14b96540450d4d11fa, type: 3}
     Offset:

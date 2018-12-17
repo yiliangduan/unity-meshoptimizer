@@ -86,8 +86,12 @@
     <Compile Include="Assets\AtlasTool\Scripts\TextureAtlas.cs" />
     <Compile Include="Assets\AtlasTool\Scripts\TextureAtlasElement.cs" />
     <Compile Include="Assets\AtlasTool\Scripts\TexturePacker.cs" />
-    <Compile Include="Assets\MeshTool\Scripts\OptimizeMeshMaterial.cs" />
+    <Compile Include="Assets\MeshTool\Scripts\MeshConfig.cs" />
+    <Compile Include="Assets\MeshTool\Scripts\OptimizeMesh.cs" />
     <Compile Include="Assets\Test\Test.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Test\MeshToolTest\lowpolybuildings\Shaders\TestShader.shader" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

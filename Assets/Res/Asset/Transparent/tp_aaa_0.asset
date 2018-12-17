@@ -17,7 +17,7 @@ MonoBehaviour:
   AllowFlip: 0
   Width: 1024
   Height: 1024
-  Atlas: {fileID: 0}
+  Atlas: {fileID: 2800000, guid: 47286b38946c7a849ac90302e7af1ef2, type: 3}
   ElementList:
   - Tex: {fileID: 2800000, guid: 64a22d8d21efdc34aba48e87ac497a64, type: 3}
     Offset:
@@ -49,7 +49,7 @@ MonoBehaviour:
     Size:
       x: 300
       y: 311
-  - Tex: {fileID: 2800000, guid: c69d5d3172c792c4581f07eb575a1322, type: 3}
+  - Tex: {fileID: 2800000, guid: 4c374488e821c3941a03abcb1e5d9968, type: 3}
     Offset:
       x: 512
       y: 311
@@ -59,7 +59,7 @@ MonoBehaviour:
     Size:
       x: 256
       y: 256
-  - Tex: {fileID: 2800000, guid: 4c374488e821c3941a03abcb1e5d9968, type: 3}
+  - Tex: {fileID: 2800000, guid: dcfac49c59075cd41839fa592f5c9843, type: 3}
     Offset:
       x: 768
       y: 311
@@ -69,7 +69,7 @@ MonoBehaviour:
     Size:
       x: 256
       y: 256
-  - Tex: {fileID: 2800000, guid: 395c45260691d4743b42f63ad077ece9, type: 3}
+  - Tex: {fileID: 2800000, guid: 30501b8e96031214b80910a4457e1f4a, type: 3}
     Offset:
       x: 500
       y: 567
@@ -79,7 +79,7 @@ MonoBehaviour:
     Size:
       x: 256
       y: 256
-  - Tex: {fileID: 2800000, guid: af9f8acf3c327fc4186e715b287fa56a, type: 3}
+  - Tex: {fileID: 2800000, guid: c69d5d3172c792c4581f07eb575a1322, type: 3}
     Offset:
       x: 756
       y: 567
@@ -99,7 +99,7 @@ MonoBehaviour:
     Size:
       x: 300
       y: 183
-  - Tex: {fileID: 2800000, guid: e7075111eaeddd046aa2ead210b711c9, type: 3}
+  - Tex: {fileID: 2800000, guid: 69a1429df4b5bc4489a28cbf622aa289, type: 3}
     Offset:
       x: 812
       y: 0
@@ -107,9 +107,9 @@ MonoBehaviour:
       x: 1
       y: 1
     Size:
-      x: 200
-      y: 254
-  - Tex: {fileID: 2800000, guid: f33c767ba5af12e4f84031a642d6ad31, type: 3}
+      x: 150
+      y: 183
+  - Tex: {fileID: 2800000, guid: 327947bf06fa44c459bf7b15f4901ead, type: 3}
     Offset:
       x: 800
       y: 823
@@ -117,5 +117,15 @@ MonoBehaviour:
       x: 1
       y: 1
     Size:
-      x: 50
-      y: 61
+      x: 149
+      y: 181
+  - Tex: {fileID: 2800000, guid: f82397fb3db77e84185304defca18b40, type: 3}
+    Offset:
+      x: 812
+      y: 183
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 64
+      y: 64
