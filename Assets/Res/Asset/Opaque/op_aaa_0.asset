@@ -109,10 +109,20 @@ MonoBehaviour:
     Size:
       x: 256
       y: 128
-  - Tex: {fileID: 2800000, guid: d93264b38eed33b458fd5c871571ea53, type: 3}
+  - Tex: {fileID: 2800000, guid: 69a1429df4b5bc4489a28cbf622aa289, type: 3}
     Offset:
       x: 512
       y: 640
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 128
+      y: 128
+  - Tex: {fileID: 2800000, guid: d93264b38eed33b458fd5c871571ea53, type: 3}
+    Offset:
+      x: 512
+      y: 768
     Scale:
       x: 1
       y: 1

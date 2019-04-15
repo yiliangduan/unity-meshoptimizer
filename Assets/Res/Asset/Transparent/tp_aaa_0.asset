@@ -29,7 +29,7 @@ MonoBehaviour:
     Size:
       x: 512
       y: 512
-  - Tex: {fileID: 2800000, guid: 8d48c5ae790406e49b8a846b679aa9e4, type: 3}
+  - Tex: {fileID: 2800000, guid: 395c45260691d4743b42f63ad077ece9, type: 3}
     Offset:
       x: 0
       y: 512
@@ -37,42 +37,22 @@ MonoBehaviour:
       x: 1
       y: 1
     Size:
-      x: 500
-      y: 491
-  - Tex: {fileID: 2800000, guid: 6201f388236c5a1448cbfb726b36503a, type: 3}
+      x: 256
+      y: 256
+  - Tex: {fileID: 2800000, guid: 904fdd5581d1b9c428b12c4ee62495f7, type: 3}
     Offset:
-      x: 512
-      y: 0
+      x: 0
+      y: 768
     Scale:
       x: 1
       y: 1
     Size:
-      x: 300
-      y: 311
+      x: 256
+      y: 256
   - Tex: {fileID: 2800000, guid: 4c374488e821c3941a03abcb1e5d9968, type: 3}
     Offset:
       x: 512
-      y: 311
-    Scale:
-      x: 1
-      y: 1
-    Size:
-      x: 256
-      y: 256
-  - Tex: {fileID: 2800000, guid: dcfac49c59075cd41839fa592f5c9843, type: 3}
-    Offset:
-      x: 768
-      y: 311
-    Scale:
-      x: 1
-      y: 1
-    Size:
-      x: 256
-      y: 256
-  - Tex: {fileID: 2800000, guid: 30501b8e96031214b80910a4457e1f4a, type: 3}
-    Offset:
-      x: 500
-      y: 567
+      y: 0
     Scale:
       x: 1
       y: 1
@@ -81,51 +61,61 @@ MonoBehaviour:
       y: 256
   - Tex: {fileID: 2800000, guid: c69d5d3172c792c4581f07eb575a1322, type: 3}
     Offset:
-      x: 756
-      y: 567
+      x: 768
+      y: 0
     Scale:
       x: 1
       y: 1
     Size:
       x: 256
       y: 256
-  - Tex: {fileID: 2800000, guid: eb29fbed8d1095344a880fbccce490bf, type: 3}
+  - Tex: {fileID: 2800000, guid: e7879bbdf8a469648aa58b51bc74f5b1, type: 3}
     Offset:
-      x: 500
-      y: 823
+      x: 256
+      y: 512
     Scale:
       x: 1
       y: 1
     Size:
-      x: 300
-      y: 183
-  - Tex: {fileID: 2800000, guid: 69a1429df4b5bc4489a28cbf622aa289, type: 3}
+      x: 256
+      y: 256
+  - Tex: {fileID: 2800000, guid: dcfac49c59075cd41839fa592f5c9843, type: 3}
     Offset:
-      x: 812
-      y: 0
+      x: 256
+      y: 768
     Scale:
       x: 1
       y: 1
     Size:
-      x: 150
-      y: 183
-  - Tex: {fileID: 2800000, guid: 327947bf06fa44c459bf7b15f4901ead, type: 3}
+      x: 256
+      y: 256
+  - Tex: {fileID: 2800000, guid: af9f8acf3c327fc4186e715b287fa56a, type: 3}
     Offset:
-      x: 800
-      y: 823
+      x: 512
+      y: 256
     Scale:
       x: 1
       y: 1
     Size:
-      x: 149
-      y: 181
-  - Tex: {fileID: 2800000, guid: f82397fb3db77e84185304defca18b40, type: 3}
+      x: 256
+      y: 256
+  - Tex: {fileID: 2800000, guid: 84c5edac4d999644bae0ff8f756914b0, type: 3}
     Offset:
-      x: 812
-      y: 183
+      x: 768
+      y: 256
     Scale:
       x: 1
       y: 1
     Size:
-      x: 64
-      y: 64
+      x: 256
+      y: 256
+  - Tex: {fileID: 2800000, guid: 349b74d5085649547952eff894d56ad3, type: 3}
+    Offset:
+      x: 512
+      y: 512
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 256
+      y: 256
