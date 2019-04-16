@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Elang.Tools
+namespace Yiliang.Tools
 {
     [CustomEditor(typeof(TextureAtlas))]
     public class TextureAtlasEditor : Editor

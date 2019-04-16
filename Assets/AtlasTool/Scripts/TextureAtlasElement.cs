@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 
-namespace Elang.Tools
+namespace Yiliang.Tools
 {
     [System.Serializable]
     public class TextureAtlasElement

@@ -3,7 +3,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace Elang.Tools
+namespace Yiliang.Tools
 {
     public class TextureAtlas : ScriptableObject
     {

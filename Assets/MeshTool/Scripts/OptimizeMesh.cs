@@ -4,7 +4,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace Elang.Tools
+namespace Yiliang.Tools
 {
     /// <summary>
     /// 
@@ -17,33 +17,6 @@ namespace Elang.Tools
     /// </summary>
     public class OptimizeMesh : Editor
     {
-        /// <summary>
-        /// 准备合并的Mesh的数据
-        /// </summary>
-        public class MeshData
-        {
-            public int[] triangles;
-
-            public Vector2[] uv;
-            public Vector2[] uv2;
-
-            public Vector3[] vertices;
-
-            public Color[] colors;
-
-            public Vector2[] normals;
-
-            public Material material;
-
-            public TexData texData;
-        }
-
-        public class TexData
-        {
-            public TextureAtlas Atlas;
-            public TextureAtlasElement Element;
-        }
-
         public static void CombineMesh()
         {
             GameObject activeGameObject = Selection.activeGameObject;
@@ -58,13 +31,252 @@ namespace Elang.Tools
 
             ReplaceTextureUseAtlas(meshDataList);
 
-            DoCombine(meshDataList);
+            List<Dictionary<string, List<MeshData>>> classifiedMeshDataList = ClassifyMeshData(meshDataList);
+
+            List<Mesh> combineMeshList = new List<Mesh>();
+
+            for (int i = 0; i < classifiedMeshDataList.Count; ++i)
+            {
+                Dictionary<string, List<MeshData>>.Enumerator enumerator = classifiedMeshDataList[i].GetEnumerator();
+
+                while (enumerator.MoveNext())
+                {
+                    List<MeshData> meshDatas = enumerator.Current.Value;
+
+                    if (meshDatas.Count > 0)
+                    {
+                        bool hasLightmap = meshDatas[0].lightmapIndex >= 0;
+
+                        string newMeshName = "combine_node_" + (hasLightmap?"_lightmap_" : "_no_lightmap_") + i;
+                        Mesh combineMesh = DoCombine(meshDatas, newMeshName);
+                        if (null != combineMesh)
+                        {
+                            combineMeshList.Add(combineMesh);
+                        }
+                        else
+                        {
+                            Debug.LogError("Combine mesh failed.");
+                        }
+                    }
+                }
+            }
         }
 
-
-        public static void DoCombine(List<MeshData> meshDataList)
+        public static Mesh DoCombine(List<MeshData> meshDatas, string newMeshName)
         {
+            Mesh combineMesh = new Mesh
+            {
+                name = newMeshName
+            };
 
+            int vertexCount = 0;
+            int triangleCount = 0;
+
+            //只要有一个元素没有值，则设为没有值
+            bool hasUV2Data = true;
+            bool hasNormalData = true;
+            bool hasColorData = true;
+
+            for (int i=0; i<meshDatas.Count; ++i)
+            {
+                MeshData meshData = meshDatas[i];
+
+                vertexCount += meshData.vertices.Length;
+                triangleCount += meshData.triangles.Length;
+
+                if (null == meshData.uv2)
+                {
+                    hasUV2Data = false;
+                }
+
+                if (null == meshData.normals)
+                {
+                    hasNormalData = false;
+                }
+
+                if (null == meshData.colors)
+                {
+                    hasColorData = false;
+                }
+            }
+
+            Vector3[] vertices = new Vector3[vertexCount];
+            int[] triangles = new int[triangleCount];
+
+            Vector2[] uvs = new Vector2[vertexCount];
+            Vector2[] uv2s = new Vector2[vertexCount];
+
+            Color[] colors = new Color[vertexCount];
+
+            Vector2[] normals = new Vector2[vertexCount];
+
+            int vertexArrayIndex = 0;
+            int triangleArrayIndex = 0;
+
+            for (int i=0; i<meshDatas.Count; ++i)
+            {
+                MeshData meshData = meshDatas[i];
+
+                if (null != meshData)
+                {
+                    vertices.CopyTo(meshData.vertices, vertexArrayIndex);
+                    
+                    triangles.CopyTo(meshData.triangles, triangleArrayIndex);
+                    triangleArrayIndex += meshData.triangles.Length;
+
+                    uvs.CopyTo(meshData.uv, vertexArrayIndex);
+
+                    if (hasUV2Data)
+                    {
+                        uv2s.CopyTo(meshData.uv2, vertexArrayIndex);
+                    }
+
+                    if (hasColorData)
+                    {
+                        colors.CopyTo(meshData.colors, vertexArrayIndex);
+                    }
+
+                    if (hasNormalData)
+                    {
+                        colors.CopyTo(meshData.normals, vertexArrayIndex);
+                    }
+
+                    vertexArrayIndex += meshData.vertices.Length;
+                }
+            }
+
+            combineMesh.vertices = vertices;
+            combineMesh.triangles = triangles;
+            combineMesh.uv = uvs;
+            combineMesh.uv2 = uv2s;
+            combineMesh.colors = colors;
+            combineMesh.RecalculateNormals();// FIXME
+
+            return combineMesh;
+        }
+
+        /// <summary>
+        /// 归类
+        /// </summary>
+        /// <param name="meshDataList"></param>
+        public static List<Dictionary<string, List<MeshData>>> ClassifyMeshData(List<MeshData> meshDataList)
+        {
+            string[] materialFiles = Directory.GetFiles(MeshConfig.MaterialDir, "*.mat", SearchOption.AllDirectories);
+            List<Material> allMaterials = new List<Material>();
+            for (int i=0; i< materialFiles.Length; ++i)
+            {
+                allMaterials.Add(AssetDatabase.LoadAssetAtPath <Material> (materialFiles[i]));
+            }
+
+            //根据lightmapIndex区分
+            Dictionary<int, List<MeshData>> meshDataDict = new Dictionary<int, List<MeshData>>();
+
+            for (int i=0; i<meshDataList.Count; ++i)
+            {
+                MeshData meshData = meshDataList[i];
+
+                List<MeshData> meshDataElement;
+                if(!meshDataDict.TryGetValue(meshData.lightmapIndex, out meshDataElement))
+                {
+                    meshDataElement = new List<MeshData>();
+                    meshDataDict.Add(meshData.lightmapIndex, meshDataElement);
+                }
+
+                meshDataElement.Add(meshData);
+            }
+
+            List<Dictionary<string, List<MeshData>>> meshNodeList = new List<Dictionary<string, List<MeshData>>>();
+
+            Dictionary<int, List<MeshData>>.Enumerator enumerator = meshDataDict.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                //相同的lightmapIndex下，根据material区分
+                Dictionary<string, List<MeshData>> meshNodeDict = new Dictionary<string, List<MeshData>>();
+
+                for (int i=0; i<enumerator.Current.Value.Count; ++i)
+                {
+                    MeshData meshData = enumerator.Current.Value[i];
+
+                    Material newMaterial = GeneratorCombineMaterial(meshData, allMaterials);
+
+                    if (null != newMaterial)
+                    {
+                        meshData.material = newMaterial;
+
+                        List<MeshData> meshNodeElement;
+                        if (!meshNodeDict.TryGetValue(newMaterial.name, out meshNodeElement))
+                        {
+                            meshNodeElement = new List<MeshData>();
+                            meshNodeDict.Add(newMaterial.name, meshNodeElement);
+                        }
+
+                        meshNodeElement.Add(meshData);
+                    }
+                    else
+                    {
+                        Debug.LogError("Generator material failed."+meshData.material.name);
+                    }
+                }
+
+                meshNodeList.Add(meshNodeDict);
+            }
+
+            return meshNodeList;
+        }
+
+        /// <summary>
+        /// 生成合并之后的Material
+        /// </summary>
+        /// <param name="meshData"></param>
+        /// <param name="materials"></param>
+        /// <returns></returns>
+        public static Material GeneratorCombineMaterial(MeshData meshData, List<Material> materials)
+        {
+            Material outMaterial = null;
+            Material inMaterial = meshData.material;
+
+            for (int i=0; i<materials.Count; ++i)
+            {
+                if (MaterialTool.CompareWithoutColor(inMaterial, materials[i]))
+                {
+                    outMaterial = materials[i];
+                    break;
+                }
+            }
+
+            if (null == outMaterial)
+            {
+                int sameNameMatIndex = 0;
+
+                string texName = meshData.texData.Atlas.name + meshData.material.shader.name;
+                texName = texName.ToLower();
+
+                string materialPath = MeshConfig.MaterialDir + texName + "_" + sameNameMatIndex + ".mat";
+
+                if (!Directory.Exists(MeshConfig.MaterialDir))
+                {
+                    Directory.CreateDirectory(MeshConfig.MaterialDir);
+                }
+
+                while (!File.Exists(materialPath))
+                {
+                    sameNameMatIndex++;
+                    materialPath = MeshConfig.MaterialDir + texName + "_" + sameNameMatIndex + ".mat";
+                }
+
+                outMaterial = new Material(meshData.material);
+
+                Texture2D atlas = meshData.texData.Atlas.Atlas;
+                Vector2 atlasSize = new Vector2(meshData.texData.Atlas.Width, meshData.texData.Atlas.Height);
+
+                outMaterial.mainTexture = atlas;
+                outMaterial.mainTextureOffset = Vector2.zero;
+                outMaterial.mainTextureScale = new Vector2(atlas.width/atlasSize.x, atlas.height/atlasSize.y);
+
+                AssetDatabase.CreateAsset(outMaterial, materialPath);
+            }
+
+            return outMaterial;
         }
 
         /// <summary>
@@ -138,11 +350,17 @@ namespace Elang.Tools
                     {
                         if (mesh.subMeshCount == meshRenderer.sharedMaterials.Length)
                         {
+                            int lightmapIndex = meshRenderer.lightmapIndex;
+
                             for (int j = 0; j < mesh.subMeshCount; ++j)
                             {
-                                MeshData meshData = GetMeshData(mesh, j);
-                                meshData.material = meshRenderer.sharedMaterials[j];
+                                Material material = meshRenderer.sharedMaterials[j];
 
+                                MeshData meshData = GetSubMeshData(mesh, j);
+                                meshData.material = material;
+                                meshData.lightmapIndex = lightmapIndex;
+                                meshData.materialColor = material.color;
+                          
                                 meshDataList.Add(meshData);
                             }
                         }
@@ -165,7 +383,13 @@ namespace Elang.Tools
             return meshDataList;
         }
 
-        public static MeshData GetMeshData(Mesh mesh, int subMeshIndex)
+        /// <summary>
+        /// 获取SubMesh的数据
+        /// </summary>
+        /// <param name="mesh"></param>
+        /// <param name="subMeshIndex"></param>
+        /// <returns></returns>
+        public static MeshData GetSubMeshData(Mesh mesh, int subMeshIndex)
         {
             //不重复的顶点索引
             List<int> subUniqueVertexIndexs = new List<int>();
@@ -270,7 +494,6 @@ namespace Elang.Tools
                 colors = subColors?.ToArray(),
 
                 normals = subNormals?.ToArray(),
-
             };
 
             return meshData;

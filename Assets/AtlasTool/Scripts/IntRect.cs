@@ -2,7 +2,7 @@
 using System;
 using UnityEngine;
 
-namespace Elang.Tools
+namespace Yiliang.Tools
 {
     [Serializable]
     public struct IntRect

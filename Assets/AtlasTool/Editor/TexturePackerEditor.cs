@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Elang.Tools
+namespace Yiliang.Tools
 {
     public class TexturePackerEditor
     {

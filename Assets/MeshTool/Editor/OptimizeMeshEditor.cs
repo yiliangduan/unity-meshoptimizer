@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace Elang.Tools
+namespace Yiliang.Tools
 {
     public class OptimizeMeshEditr : Editor
     {
