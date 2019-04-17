@@ -237,7 +237,7 @@ namespace Yiliang.Tools
 
             for (int i=0; i<materials.Count; ++i)
             {
-                if (MaterialTool.CompareWithoutColor(inMaterial, materials[i]))
+                if (MaterialTool.Compare(inMaterial, materials[i]))
                 {
                     outMaterial = materials[i];
                     break;
