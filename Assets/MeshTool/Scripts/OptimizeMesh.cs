@@ -31,13 +31,13 @@ namespace Yiliang.Tools
 
             ReplaceTextureUseAtlas(meshDataList);
 
-            List<Dictionary<string, List<MeshData>>> classifiedMeshDataList = ClassifyMeshData(meshDataList);
+            List<Dictionary<Material, List<MeshData>>> classifiedMeshDataList = ClassifyMeshData(meshDataList);
 
-            List<Mesh> combineMeshList = new List<Mesh>();
+            List<MeshNode> combineMeshList = new List<MeshNode>();
 
             for (int i = 0; i < classifiedMeshDataList.Count; ++i)
             {
-                Dictionary<string, List<MeshData>>.Enumerator enumerator = classifiedMeshDataList[i].GetEnumerator();
+                Dictionary<Material, List<MeshData>>.Enumerator enumerator = classifiedMeshDataList[i].GetEnumerator();
 
                 while (enumerator.MoveNext())
                 {
@@ -51,13 +51,48 @@ namespace Yiliang.Tools
                         Mesh combineMesh = DoCombine(meshDatas, newMeshName);
                         if (null != combineMesh)
                         {
-                            combineMeshList.Add(combineMesh);
+                            combineMeshList.Add(new MeshNode{mesh=combineMesh, material=enumerator.Current.Key});
                         }
                         else
                         {
                             Debug.LogError("Combine mesh failed.");
                         }
                     }
+                }
+            }
+
+            for (int i=0; i<combineMeshList.Count; ++i)
+            {
+                Mesh mesh = combineMeshList[i].mesh;
+                Material material = combineMeshList[i].material;
+
+                GameObject newObj = new GameObject
+                {
+                    name = mesh.name
+                };
+
+                newObj.transform.localScale = activeGameObject.transform.localScale;
+                newObj.transform.localPosition = activeGameObject.transform.localPosition;
+                newObj.transform.SetParent(activeGameObject.transform.parent);
+
+                MeshRenderer meshRenderer = newObj.AddComponent<MeshRenderer>();
+                if (null != meshRenderer)
+                {
+                    meshRenderer.material = material;
+                }
+                else
+                {
+                    Debug.Log("Add component to object failed.");
+                }
+
+                MeshFilter meshFilter = newObj.AddComponent<MeshFilter>();
+                if (null != meshFilter)
+                {
+                    meshFilter.mesh = mesh;
+                }
+                else
+                {
+                    Debug.Log("Add component to object failed.");
                 }
             }
         }
@@ -81,20 +116,22 @@ namespace Yiliang.Tools
             {
                 MeshData meshData = meshDatas[i];
 
-                vertexCount += meshData.vertices.Length;
+                int vertexLength = meshData.vertices.Length;
+
+                vertexCount += vertexLength;
                 triangleCount += meshData.triangles.Length;
 
-                if (null == meshData.uv2)
+                if (null == meshData.uv2 || meshData.uv2.Length != vertexLength)
                 {
                     hasUV2Data = false;
                 }
 
-                if (null == meshData.normals)
+                if (null == meshData.normals || meshData.normals.Length != vertexLength)
                 {
                     hasNormalData = false;
                 }
 
-                if (null == meshData.colors)
+                if (null == meshData.colors || meshData.colors.Length != vertexLength)
                 {
                     hasColorData = false;
                 }
@@ -108,7 +145,7 @@ namespace Yiliang.Tools
 
             Color[] colors = new Color[vertexCount];
 
-            Vector2[] normals = new Vector2[vertexCount];
+            Vector3[] normals = new Vector3[vertexCount];
 
             int vertexArrayIndex = 0;
             int triangleArrayIndex = 0;
@@ -119,34 +156,37 @@ namespace Yiliang.Tools
 
                 if (null != meshData)
                 {
-                    vertices.CopyTo(meshData.vertices, vertexArrayIndex);
-                    
-                    triangles.CopyTo(meshData.triangles, triangleArrayIndex);
-                    triangleArrayIndex += meshData.triangles.Length;
+                    meshData.vertices.CopyTo(vertices, vertexArrayIndex);
 
-                    uvs.CopyTo(meshData.uv, vertexArrayIndex);
+                    for (int j=0; j<meshData.triangles.Length; ++j)
+                    {
+                        triangles[triangleArrayIndex + j] = meshData.triangles[j] + vertexArrayIndex;
+                    }
+
+                    meshData.uv.CopyTo(uvs, vertexArrayIndex);
 
                     if (hasUV2Data)
                     {
-                        uv2s.CopyTo(meshData.uv2, vertexArrayIndex);
+                        meshData.uv2.CopyTo(uv2s, vertexArrayIndex);
                     }
 
                     if (hasColorData)
                     {
-                        colors.CopyTo(meshData.colors, vertexArrayIndex);
+                        meshData.colors.CopyTo(colors, vertexArrayIndex);
                     }
 
                     if (hasNormalData)
                     {
-                        colors.CopyTo(meshData.normals, vertexArrayIndex);
+                        meshData.normals.CopyTo(normals, vertexArrayIndex);
                     }
 
                     vertexArrayIndex += meshData.vertices.Length;
+                    triangleArrayIndex += meshData.triangles.Length;
                 }
             }
 
             combineMesh.vertices = vertices;
-            combineMesh.triangles = triangles;
+            combineMesh.SetTriangles(triangles, 0);
             combineMesh.uv = uvs;
             combineMesh.uv2 = uv2s;
             combineMesh.colors = colors;
@@ -159,13 +199,18 @@ namespace Yiliang.Tools
         /// 归类
         /// </summary>
         /// <param name="meshDataList"></param>
-        public static List<Dictionary<string, List<MeshData>>> ClassifyMeshData(List<MeshData> meshDataList)
+        public static List<Dictionary<Material, List<MeshData>>> ClassifyMeshData(List<MeshData> meshDataList)
         {
-            string[] materialFiles = Directory.GetFiles(MeshConfig.MaterialDir, "*.mat", SearchOption.AllDirectories);
             List<Material> allMaterials = new List<Material>();
-            for (int i=0; i< materialFiles.Length; ++i)
+
+            if (Directory.Exists(MeshConfig.MaterialDir))
             {
-                allMaterials.Add(AssetDatabase.LoadAssetAtPath <Material> (materialFiles[i]));
+                string[] materialFiles = Directory.GetFiles(MeshConfig.MaterialDir, "*.mat", SearchOption.AllDirectories);
+
+                for (int i = 0; i < materialFiles.Length; ++i)
+                {
+                    allMaterials.Add(AssetDatabase.LoadAssetAtPath<Material>(materialFiles[i]));
+                }
             }
 
             //根据lightmapIndex区分
@@ -185,13 +230,13 @@ namespace Yiliang.Tools
                 meshDataElement.Add(meshData);
             }
 
-            List<Dictionary<string, List<MeshData>>> meshNodeList = new List<Dictionary<string, List<MeshData>>>();
+            List<Dictionary<Material, List<MeshData>>> meshNodeList = new List<Dictionary<Material, List<MeshData>>>();
 
             Dictionary<int, List<MeshData>>.Enumerator enumerator = meshDataDict.GetEnumerator();
             while (enumerator.MoveNext())
             {
                 //相同的lightmapIndex下，根据material区分
-                Dictionary<string, List<MeshData>> meshNodeDict = new Dictionary<string, List<MeshData>>();
+                Dictionary<Material, List<MeshData>> meshNodeDict = new Dictionary<Material, List<MeshData>>();
 
                 for (int i=0; i<enumerator.Current.Value.Count; ++i)
                 {
@@ -204,10 +249,10 @@ namespace Yiliang.Tools
                         meshData.material = newMaterial;
 
                         List<MeshData> meshNodeElement;
-                        if (!meshNodeDict.TryGetValue(newMaterial.name, out meshNodeElement))
+                        if (!meshNodeDict.TryGetValue(newMaterial, out meshNodeElement))
                         {
                             meshNodeElement = new List<MeshData>();
-                            meshNodeDict.Add(newMaterial.name, meshNodeElement);
+                            meshNodeDict.Add(newMaterial, meshNodeElement);
                         }
 
                         meshNodeElement.Add(meshData);
@@ -232,51 +277,57 @@ namespace Yiliang.Tools
         /// <returns></returns>
         public static Material GeneratorCombineMaterial(MeshData meshData, List<Material> materials)
         {
-            Material outMaterial = null;
-            Material inMaterial = meshData.material;
+            Material outMaterial = new Material(meshData.material);
 
-            for (int i=0; i<materials.Count; ++i)
+            Texture2D atlas = meshData.texData.Atlas.Atlas;
+            Vector2 atlasSize = new Vector2(meshData.texData.Atlas.Width, meshData.texData.Atlas.Height);
+
+            outMaterial.mainTexture = atlas;
+            outMaterial.mainTextureOffset = Vector2.zero;
+            outMaterial.mainTextureScale = new Vector2(atlas.width / atlasSize.x, atlas.height / atlasSize.y);
+
+            materials.Add(outMaterial);
+
+            bool foundSameMaterial = false;
+            for (int i = 0; i < materials.Count; ++i)
             {
-                if (MaterialTool.Compare(inMaterial, materials[i]))
+                if (MaterialTool.Compare(outMaterial, materials[i]))
                 {
                     outMaterial = materials[i];
+                    foundSameMaterial = true;
                     break;
                 }
             }
 
-            if (null == outMaterial)
+            if (!foundSameMaterial)
             {
-                int sameNameMatIndex = 0;
-
-                string texName = meshData.texData.Atlas.name + meshData.material.shader.name;
-                texName = texName.ToLower();
-
-                string materialPath = MeshConfig.MaterialDir + texName + "_" + sameNameMatIndex + ".mat";
-
-                if (!Directory.Exists(MeshConfig.MaterialDir))
-                {
-                    Directory.CreateDirectory(MeshConfig.MaterialDir);
-                }
-
-                while (!File.Exists(materialPath))
-                {
-                    sameNameMatIndex++;
-                    materialPath = MeshConfig.MaterialDir + texName + "_" + sameNameMatIndex + ".mat";
-                }
-
-                outMaterial = new Material(meshData.material);
-
-                Texture2D atlas = meshData.texData.Atlas.Atlas;
-                Vector2 atlasSize = new Vector2(meshData.texData.Atlas.Width, meshData.texData.Atlas.Height);
-
-                outMaterial.mainTexture = atlas;
-                outMaterial.mainTextureOffset = Vector2.zero;
-                outMaterial.mainTextureScale = new Vector2(atlas.width/atlasSize.x, atlas.height/atlasSize.y);
-
-                AssetDatabase.CreateAsset(outMaterial, materialPath);
+                AssetDatabase.CreateAsset(outMaterial, GeneratorMaterialPath(meshData));
             }
 
             return outMaterial;
+        }
+
+        private static string GeneratorMaterialPath(MeshData meshData)
+        {
+            int sameNameMatIndex = 0;
+
+            string texName = meshData.texData.Atlas.name + "_" + meshData.material.shader.name;
+            texName = texName.ToLower();
+
+            string materialPath = MeshConfig.MaterialDir + texName + "_" + sameNameMatIndex + ".mat";
+
+            if (!Directory.Exists(MeshConfig.MaterialDir))
+            {
+                Directory.CreateDirectory(MeshConfig.MaterialDir);
+            }
+
+            while (File.Exists(materialPath))
+            {
+                sameNameMatIndex++;
+                materialPath = MeshConfig.MaterialDir + texName + "_" + sameNameMatIndex + ".mat";
+            }
+
+            return materialPath;
         }
 
         /// <summary>
@@ -316,12 +367,14 @@ namespace Yiliang.Tools
                             if (null != element)
                             {
                                 meshData.texData = new TexData() { Atlas = textureAtlas, Element = element };
-                            }
-                            else
-                            {
-                                Debug.LogError("Texture not combine to atlas." + texture.name);
+                                break;
                             }
                         }
+                    }
+
+                    if (null == meshData.texData)
+                    {
+                        Debug.LogError("Texture not combine to atlas. " + texture.name);
                     }
                 }
             }
@@ -344,7 +397,7 @@ namespace Yiliang.Tools
                 MeshFilter meshFilter = meshRenderer.GetComponent<MeshFilter>();
                 if (null != meshFilter)
                 {
-                    Mesh mesh = meshFilter.mesh;
+                    Mesh mesh = meshFilter.sharedMesh;
 
                     if (null != mesh)
                     {
@@ -356,7 +409,7 @@ namespace Yiliang.Tools
                             {
                                 Material material = meshRenderer.sharedMaterials[j];
 
-                                MeshData meshData = GetSubMeshData(mesh, j);
+                                MeshData meshData = GetSubMeshData(meshFilter, j);
                                 meshData.material = material;
                                 meshData.lightmapIndex = lightmapIndex;
                                 meshData.materialColor = material.color;
@@ -389,111 +442,40 @@ namespace Yiliang.Tools
         /// <param name="mesh"></param>
         /// <param name="subMeshIndex"></param>
         /// <returns></returns>
-        public static MeshData GetSubMeshData(Mesh mesh, int subMeshIndex)
+        public static MeshData GetSubMeshData(MeshFilter meshFilter, int subMeshIndex)
         {
-            //不重复的顶点索引
-            List<int> subUniqueVertexIndexs = new List<int>();
+            Mesh mesh = meshFilter.sharedMesh;
 
-            int[] triangles = mesh.GetTriangles(subMeshIndex);
-            for (int i=0; i<triangles.Length; ++i)
+            if (null == mesh)
             {
-                if (!subUniqueVertexIndexs.Contains(triangles[i]))
-                {
-                    subUniqueVertexIndexs.Add(triangles[i]);
-                }
+                Debug.LogError("Mesh missing.");
+                return null;
             }
 
-            //SubMesh的顶点
-            List<Vector3> subVertices = new List<Vector3>();
-
-            //SubMesh的UV
-            List<Vector2> subUVs = new List<Vector2>();
-            List<Vector2> subUV2s = new List<Vector2>();
-
-            //SubMesh的颜色
-            List<Color> subColors = new List<Color>();
-
-            //法线
-            List<Vector2> subNormals = new List<Vector2>();
+            int[] triangles = mesh.GetTriangles(subMeshIndex);
 
             Vector3[] vertices = mesh.vertices;
-            Vector2[] uvs = mesh.uv;
-            Vector2[] uv2s = mesh.uv2;
-            Color[] colors = mesh.colors;
-            Vector3[] normals = mesh.normals;
-            
-            for (int i=0; i< subUniqueVertexIndexs.Count; ++i)
+
+            Matrix4x4 matrix4x4 = meshFilter.gameObject.transform.localToWorldMatrix;
+
+            for (int i=0; i< vertices.Length; ++i)
             {
-                int vertexIndex = subUniqueVertexIndexs[i];
-                if (vertexIndex >= 0 && vertexIndex < vertices.Length)
-                {
-                    subVertices.Add(vertices[vertexIndex]);
-                }
-                else
-                {
-                    Debug.LogError("Vertex index out of range. " + vertexIndex);
-                }
-     
-    
-                if (vertexIndex >= 0 && vertexIndex < uvs.Length)
-                {
-                    subUVs.Add(uvs[vertexIndex]);
-                }
-                else
-                {
-                    Debug.LogError("UV index out of range. " + vertexIndex);
-                }
-
-                //UV2没有是正常的
-                if (null != uv2s && uv2s.Length > 0)
-                {
-                    if (vertexIndex >=0 && vertexIndex < uv2s.Length)
-                    {
-                        subUV2s.Add(uv2s[vertexIndex]);
-                    }
-                    else
-                    {
-                        Debug.LogError("UV2 index out of range. " + vertexIndex);
-                    }
-                }
-
-                if (null != colors && colors.Length > 0)
-                {
-                    if (vertexIndex >= 0 && vertexIndex < colors.Length)
-                    {
-                        subColors.Add(colors[vertexIndex]);
-                    }
-                    else
-                    {
-                        Debug.LogError("Color index out of range. " + vertexIndex);
-                    }
-                }
-
-                if (null != normals && normals.Length > 0)
-                {
-                    if (vertexIndex >= 0 && vertexIndex < normals.Length)
-                    {
-                        subNormals.Add(normals[vertexIndex]);
-                    }
-                    else
-                    {
-                        Debug.LogError("Normal index out of range. " + vertexIndex);
-                    }
-                }
+                ////转换到世界坐标。因为涉及到多个Mesh合并，每个Mesh的vertices都是自己的标准化坐标，所以转到到世界坐标
+                vertices[i] = matrix4x4.MultiplyPoint(vertices[i]);
             }
 
             MeshData meshData = new MeshData
             {
-                triangles = mesh.GetTriangles(subMeshIndex),
+                triangles = triangles,
 
-                uv = subUVs.ToArray(),
-                uv2 = subUV2s?.ToArray(),
+                uv = mesh.uv,
+                uv2 = mesh.uv2,
 
-                vertices = subVertices.ToArray(),
+                vertices = vertices,
 
-                colors = subColors?.ToArray(),
+                colors = mesh.colors,
 
-                normals = subNormals?.ToArray(),
+                normals = mesh.normals,
             };
 
             return meshData;

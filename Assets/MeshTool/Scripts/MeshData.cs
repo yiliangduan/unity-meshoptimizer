@@ -24,12 +24,19 @@ namespace Yiliang.Tools
         public Color[] colors;
 
         //可选
-        public Vector2[] normals;
+        public Vector3[] normals;
 
         public Material material;
 
         public TexData texData;
 
         public Color materialColor;
+    }
+
+    public class MeshNode
+    {
+        public Material material;
+
+        public Mesh mesh;
     }
 }
