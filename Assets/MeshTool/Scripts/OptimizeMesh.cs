@@ -95,6 +95,8 @@ namespace Yiliang.Tools
                     Debug.Log("Add component to object failed.");
                 }
             }
+
+            activeGameObject.gameObject.SetActive(false);
         }
 
         public static Mesh DoCombine(List<MeshData> meshDatas, string newMeshName)
@@ -137,6 +139,7 @@ namespace Yiliang.Tools
                 }
             }
 
+
             Vector3[] vertices = new Vector3[vertexCount];
             int[] triangles = new int[triangleCount];
 
@@ -163,7 +166,28 @@ namespace Yiliang.Tools
                         triangles[triangleArrayIndex + j] = meshData.triangles[j] + vertexArrayIndex;
                     }
 
-                    meshData.uv.CopyTo(uvs, vertexArrayIndex);
+                    IntVector2 elementOffset = meshData.texData.Element.Offset;
+
+                    TextureAtlas atlas = meshData.texData.Atlas;
+
+                    int atlasWidth = atlas.Width;
+                    int atlasHeight = atlas.Height;
+
+                    Vector2 uvOffset = new Vector2(elementOffset.x/(float)atlasWidth, elementOffset.y/(float)atlasHeight);
+
+                    float atlasRealWidth = atlas.Atlas.width;
+                    float atlasRealHeight = atlas.Atlas.height;
+
+                    Vector2 atlasScale = new Vector2(atlasRealWidth/ atlasWidth, atlasRealHeight/ atlasHeight);
+
+                    IntVector2 texSize = meshData.texData.Element.Size;
+                    Vector2 texLocalOffset = new Vector2(texSize.x/(float)atlasWidth, texSize.y/(float)atlasHeight);
+
+                    for (int j=0; j<meshData.uv.Length; ++j)
+                    {
+                        uvs[vertexArrayIndex + j] = new Vector2(meshData.uv[j].x * texLocalOffset.x, meshData.uv[j].y * texLocalOffset.y) + 
+                                                    new Vector2(uvOffset.x * atlasScale.x, uvOffset.y * atlasScale.y);
+                    }
 
                     if (hasUV2Data)
                     {
