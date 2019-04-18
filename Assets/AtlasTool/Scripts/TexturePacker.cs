@@ -108,73 +108,110 @@ namespace Yiliang.Tools
 
             List<TextureAtlas> atlasList = new List<TextureAtlas>();
 
-            string fileName = string.Empty;
+            string fileName = atlasName + "_" + atlasIndex;
+            string assetPath = TextureAtlas.GetAssetPath(isTransparent, fileName);
 
-            while (textureList.Count > 0)
+            while (File.Exists(assetPath))
             {
-                EditorUtility.DisplayProgressBar("", "Layout all texture to atlas ", (atlasIndex + 1) / textureCount);
+                TextureAtlas atlas = AssetDatabase.LoadAssetAtPath<TextureAtlas>(assetPath);
 
-                fileName = atlasName + "_" + atlasIndex;
-
-                string assetPath = TextureAtlas.GetAssetPath(isTransparent, fileName);
-
-                TextureAtlas atlas;
-
-                if (File.Exists(assetPath))
+                if (null != atlas)
                 {
-                    atlas = AssetDatabase.LoadAssetAtPath<TextureAtlas>(assetPath);
-
-                    if (null == atlas)
-                    {
-                        Debug.LogError("Load asset failed. " + assetPath);
-                        return null;
-                    }
-
                     atlas.Layout();
-
-                    //如果文件夹下的图片已经删除了，则把Asset中保存的该文件的信息也删除
-                    for (int i = atlas.ElementList.Count - 1; i > 0; --i)
-                    {
-                        bool isFound = false;
-
-                        for (int j = 0; j < textureList.Count; ++j)
-                        {
-                            if (atlas.ElementList[i].Tex == textureList[j])
-                            {
-                                isFound = true;
-                                break;
-                            }
-                        }
-
-                        if (!isFound)
-                        {
-                            atlas.RemoveElementAt(i);
-                        }
-                    }
-                }
-                else
-                {
-                    atlas = ScriptableObject.CreateInstance<TextureAtlas>();
-                    atlas.Init(atlasWidth, atlasHeight, false, isTransparent, fileName);
+                    atlasList.Add(atlas);
                 }
 
-                atlasList.Add(atlas);
                 atlasIndex++;
 
-                //新增图片
-                for (int i = textureList.Count - 1; i >= 0; --i)
-                {
-                    TextureAtlasElement element = atlas.GetElement(textureList[i]);
+                fileName = atlasName + "_" + atlasIndex;
+                assetPath = TextureAtlas.GetAssetPath(isTransparent, fileName);
+            }
 
-                    if (null != element)
+            List<Texture2D> newlyTextures = new List<Texture2D>();
+
+            //找出新增的图片
+            for (int i=0; i<textureList.Count; ++i)
+            {
+                bool found = false;
+
+                for (int j=0; j<atlasList.Count; ++j)
+                {
+                    TextureAtlas atlas = atlasList[j];
+
+                    if (null != atlas)
                     {
-                        textureList.RemoveAt(i);
-                    }
-                    else
-                    {
-                        if (atlas.AddTexture(textureList[i]))
+                        TextureAtlasElement element = atlas.GetElement(textureList[i]);
+                        if (null != element)
                         {
-                            textureList.RemoveAt(i);
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!found)
+                    newlyTextures.Add(textureList[i]);
+            }
+
+            //Asset中删除图片已经删除的记录
+            for (int i=0; i<atlasList.Count; ++i)
+            {
+                TextureAtlas atlas = atlasList[i];
+
+                for (int j=atlas.ElementList.Count-1; j>=0; --j)
+                {
+                    Texture2D elementTex = atlas.ElementList[j].Tex;
+
+                    bool found = false;
+                    for (int m=0; m<textureList.Count; ++m)
+                    {
+                        if(elementTex == textureList[m])
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        atlas.RemoveElementAt(j);
+                    }
+                }
+            }
+
+            //排列新增的图片
+            for (int i=0; i<newlyTextures.Count; ++i)
+            {
+                Texture2D newlyTexture = newlyTextures[i];
+
+                if (null != newlyTexture)
+                {
+                    bool added = false;
+
+                    for (int j=0; j<atlasList.Count; ++j)
+                    {
+                        if(atlasList[j].AddTexture(newlyTexture))
+                        {
+                            added = true;
+                            break;
+                        }
+                    }
+
+                    if (!added)
+                    {
+                        fileName = atlasName + "_" + atlasList.Count;
+                        assetPath = TextureAtlas.GetAssetPath(isTransparent, fileName);
+
+                        TextureAtlas atlas = ScriptableObject.CreateInstance<TextureAtlas>();
+                        if (null != atlas)
+                        {
+                            atlas.Init(atlasWidth, atlasHeight, false, isTransparent, fileName);
+                            atlas.AddTexture(newlyTexture);
+
+                            atlasList.Add(atlas);
+                        }
+                        else
+                        {
+                            Debug.Log("Create atlas instance failed.");
                         }
                     }
                 }

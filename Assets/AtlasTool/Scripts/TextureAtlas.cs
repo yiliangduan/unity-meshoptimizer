@@ -144,8 +144,20 @@ namespace Yiliang.Tools
 
             if (!File.Exists(AssetPath))
             {
-                AssetDatabase.CreateAsset(this, AssetPath);
+                AssetDatabase.DeleteAsset(AssetPath);
             }
+
+            TextureAtlas textureAtlas = new TextureAtlas();
+            textureAtlas.AssetPath = AssetPath;
+            textureAtlas.AtlasPath = AtlasPath;
+            textureAtlas.IsTransparent = IsTransparent;
+            textureAtlas.AllowFlip = AllowFlip;
+            textureAtlas.Width = Width;
+            textureAtlas.Height = Height;
+            textureAtlas.Atlas = Atlas;
+            textureAtlas.ElementList = ElementList;
+
+            AssetDatabase.CreateAsset(textureAtlas, AssetPath);
 
             AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
             AssetDatabase.SaveAssets();
