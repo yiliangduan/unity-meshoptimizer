@@ -3,8 +3,9 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -29,16 +30,6 @@ MonoBehaviour:
     Size:
       x: 512
       y: 512
-  - Tex: {fileID: 2800000, guid: 7564a003cbb956c41a15bb2db2fdbfd2, type: 3}
-    Offset:
-      x: 512
-      y: 0
-    Scale:
-      x: 1
-      y: 1
-    Size:
-      x: 512
-      y: 256
   - Tex: {fileID: 2800000, guid: f7c703850d0ec294cad1cbbe07a16956, type: 3}
     Offset:
       x: 512
@@ -129,3 +120,53 @@ MonoBehaviour:
     Size:
       x: 64
       y: 64
+  - Tex: {fileID: 2800000, guid: 5f0b909919a50b8408aea475e4f991a1, type: 3}
+    Offset:
+      x: 640
+      y: 640
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 256
+      y: 128
+  - Tex: {fileID: 2800000, guid: 4edacb79067305442b4b9c27b4e856ba, type: 3}
+    Offset:
+      x: 576
+      y: 768
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 256
+      y: 128
+  - Tex: {fileID: 2800000, guid: 3074e23d185669a4bb33c91ffcbd05f3, type: 3}
+    Offset:
+      x: 512
+      y: 896
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 256
+      y: 128
+  - Tex: {fileID: 2800000, guid: 411892bdd890f69429bd6b2b97c4ce7c, type: 3}
+    Offset:
+      x: 768
+      y: 896
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 256
+      y: 128
+  - Tex: {fileID: 2800000, guid: 7564a003cbb956c41a15bb2db2fdbfd2, type: 3}
+    Offset:
+      x: 512
+      y: 0
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 512
+      y: 256

@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0de7f3bff914ff48b982d06386196e8, type: 3}
+  m_Name: op_aaa_1
+  m_EditorClassIdentifier: 
+  AssetPath: Assets/Res/Asset/Opaque/op_aaa_1.asset
+  AtlasPath: Assets/Res/Atlas/Opaque/op_aaa_1.jpg
+  IsTransparent: 0
+  AllowFlip: 0
+  Width: 1024
+  Height: 1024
+  Atlas: {fileID: 2800000, guid: 9a14190932b4caa44819b7a0cc762e7c, type: 3}
+  ElementList:
+  - Tex: {fileID: 2800000, guid: 9e1d0966ba94dfb469c66b563bfe302a, type: 3}
+    Offset:
+      x: 0
+      y: 0
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 256
+      y: 128
+  - Tex: {fileID: 2800000, guid: 6cd6fb5c9d7620345a07c23a3f41c087, type: 3}
+    Offset:
+      x: 0
+      y: 128
+    Scale:
+      x: 1
+      y: 1
+    Size:
+      x: 256
+      y: 128
