@@ -7,7 +7,7 @@ namespace Yiliang.Tools
         [MenuItem("GameObject/OptimizeMesh/Combine Mesh", false, 0)]
         public static void CombineMesh()
         {
-            OptimizeMesh.CombineMesh();
+            MeshCombiner.CombineMesh();
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Yiliang.Tools
     /// 2.需要合并的MeshRenderer使用了不同的Material，但是Shader相同并除了Shader所使用的Texture不同之外其他属性都相同。
     ///   这种情况先合并贴图，然后根据贴图再图集中的位置偏移重写MeshRenderer的UV，然后合并MeshRenderer
     /// </summary>
-    public class OptimizeMesh : Editor
+    public class MeshCombiner : Editor
     {
         public static void CombineMesh()
         {
@@ -45,9 +45,8 @@ namespace Yiliang.Tools
 
                     if (meshDatas.Count > 0)
                     {
-                        bool hasLightmap = meshDatas[0].lightmapIndex >= 0;
+                        string newMeshName = GeneratorCombineMeshName(meshDatas[i]);
 
-                        string newMeshName = "combine_node_" + (hasLightmap?"_lightmap_" : "_no_lightmap_") + i;
                         Mesh combineMesh = DoCombine(meshDatas, newMeshName);
                         if (null != combineMesh)
                         {
@@ -61,6 +60,10 @@ namespace Yiliang.Tools
                 }
             }
 
+            GameObject combineNodeRoot = new GameObject("CombineNode");
+            ResetGameObject(combineNodeRoot);
+            combineNodeRoot.transform.SetParent(activeGameObject.transform.parent);
+
             for (int i=0; i<combineMeshList.Count; ++i)
             {
                 Mesh mesh = combineMeshList[i].mesh;
@@ -71,9 +74,8 @@ namespace Yiliang.Tools
                     name = mesh.name
                 };
 
-                newObj.transform.localScale = activeGameObject.transform.localScale;
-                newObj.transform.localPosition = activeGameObject.transform.localPosition;
-                newObj.transform.SetParent(activeGameObject.transform.parent);
+                ResetGameObject(newObj);
+                newObj.transform.SetParent(combineNodeRoot.transform);
 
                 MeshRenderer meshRenderer = newObj.AddComponent<MeshRenderer>();
                 if (null != meshRenderer)
@@ -310,8 +312,6 @@ namespace Yiliang.Tools
             outMaterial.mainTextureOffset = Vector2.zero;
             outMaterial.mainTextureScale = new Vector2(atlas.width / atlasSize.x, atlas.height / atlasSize.y);
 
-            materials.Add(outMaterial);
-
             bool foundSameMaterial = false;
             for (int i = 0; i < materials.Count; ++i)
             {
@@ -328,6 +328,9 @@ namespace Yiliang.Tools
                 AssetDatabase.CreateAsset(outMaterial, GeneratorMaterialPath(meshData));
             }
 
+            if (!materials.Contains(outMaterial))
+                materials.Add(outMaterial);
+
             return outMaterial;
         }
 
@@ -335,7 +338,11 @@ namespace Yiliang.Tools
         {
             int sameNameMatIndex = 0;
 
-            string texName = meshData.texData.Atlas.name + "_" + meshData.material.shader.name;
+            string shaderName = meshData.material.shader.name;
+            shaderName = shaderName.Replace("\\", "_");
+            shaderName = shaderName.Replace("/", "_");
+
+            string texName = meshData.texData.Atlas.name + "#" + shaderName;
             texName = texName.ToLower();
 
             string materialPath = MeshConfig.MaterialDir + texName + "_" + sameNameMatIndex + ".mat";
@@ -352,6 +359,15 @@ namespace Yiliang.Tools
             }
 
             return materialPath;
+        }
+
+        private static string GeneratorCombineMeshName(MeshData meshData)
+        {
+            string materialName = meshData.material.name;
+            string newMeshName = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(materialName);
+            newMeshName = newMeshName.Replace("_",string.Empty);
+
+            return newMeshName;
         }
 
         /// <summary>
@@ -436,7 +452,11 @@ namespace Yiliang.Tools
                                 MeshData meshData = GetSubMeshData(meshFilter, j);
                                 meshData.material = material;
                                 meshData.lightmapIndex = lightmapIndex;
-                                meshData.materialColor = material.color;
+
+                                if(material.HasProperty("_Color"))
+                                {
+                                    meshData.materialColor = material.color;
+                                }
                           
                                 meshDataList.Add(meshData);
                             }
@@ -503,6 +523,17 @@ namespace Yiliang.Tools
             };
 
             return meshData;
+        }
+
+        public static void ResetGameObject(GameObject obj)
+        {
+            if (null != obj)
+            {
+                obj.transform.SetParent(null);
+                obj.transform.localScale = Vector3.one;
+                obj.transform.localPosition = Vector3.zero;
+                obj.transform.localEulerAngles = Vector3.zero;
+            }
         }
     }
 }
