@@ -298,13 +298,15 @@ namespace Yiliang.Tools
         /// <summary>
         /// 生成合并之后的Material
         /// </summary>
-        /// <param name="meshData"></param>
-        /// <param name="materials"></param>
+        /// <param name="meshData">每个SubMesh的数据</param>
+        /// <param name="materials">已经创建的合并之后的Mesh所用的Material</param>
         /// <returns></returns>
         public static Material GeneratorCombineMaterial(MeshData meshData, List<Material> materials)
         {
+            //属性使用未合并的Mesh的Material的属性
             Material outMaterial = new Material(meshData.material);
 
+            //贴图替换成合并之后的大贴图
             Texture2D atlas = meshData.texData.Atlas.Atlas;
             Vector2 atlasSize = new Vector2(meshData.texData.Atlas.Width, meshData.texData.Atlas.Height);
 
